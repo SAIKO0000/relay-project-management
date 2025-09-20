@@ -21,10 +21,10 @@ export async function uploadProfilePicture(
       return { success: false, error: 'Please upload an image file' }
     }
 
-    // Validate file size (max 5MB)
-    const maxSize = 5 * 1024 * 1024 // 5MB
+    // Validate file size (max 50MB)
+    const maxSize = 50 * 1024 * 1024 // 50MB
     if (file.size > maxSize) {
-      return { success: false, error: 'File size must be less than 5MB' }
+      return { success: false, error: 'File size must be less than 50MB' }
     }
 
     // Create unique filename
@@ -147,6 +147,13 @@ export async function updateProfilePicture(
       return updateResult
     }
 
+    // Dispatch a custom event to notify all components about the avatar update
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('avatarUpdated', { 
+        detail: { personnelId, avatarUrl: uploadResult.url } 
+      }))
+    }
+
     // Delete old picture if it exists
     if (currentAvatarUrl) {
       try {
@@ -177,6 +184,13 @@ export async function removeProfilePicture(
     
     if (!updateResult.success) {
       return updateResult
+    }
+
+    // Dispatch a custom event to notify all components about the avatar removal
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('avatarUpdated', { 
+        detail: { personnelId, avatarUrl: null } 
+      }))
     }
 
     // Delete file from storage

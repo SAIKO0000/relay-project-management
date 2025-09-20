@@ -177,7 +177,7 @@ export function ProfilePictureUpload({
           </div>
           
           <p className="text-xs text-gray-500 text-center">
-            Upload a square image (max 5MB)
+            Upload a square image (max 50MB)
             <br />
             JPG, PNG, or GIF format
           </p>

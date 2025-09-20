@@ -84,7 +84,26 @@ export function useCurrentUserPersonnel() {
 
   useEffect(() => {
     fetchCurrentUserPersonnel()
-  }, [fetchCurrentUserPersonnel])
+
+    // Listen for avatar update events from other components
+    const handleAvatarUpdate = (event: CustomEvent) => {
+      const { personnelId } = event.detail
+      // Only refetch if this event is for the current user
+      if (personnelId === personnel?.id) {
+        fetchCurrentUserPersonnel()
+      }
+    }
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('avatarUpdated', handleAvatarUpdate as EventListener)
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('avatarUpdated', handleAvatarUpdate as EventListener)
+      }
+    }
+  }, [fetchCurrentUserPersonnel, personnel?.id])
 
   return {
     personnel,
