@@ -76,7 +76,7 @@ export function ProfileModal({ isOpen, onCloseAction, personnel: viewingPersonne
   // Initialize form data when modal opens or personnel data changes
   useEffect(() => {
     if (isOpen && displayedPersonnel) {
-      initializeFormData()
+      queueMicrotask(initializeFormData)
     }
   }, [isOpen, displayedPersonnel, initializeFormData])
 
