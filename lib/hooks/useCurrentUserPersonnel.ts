@@ -3,10 +3,20 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/lib/auth'
+import { DEMO_CHANGE_EVENT, isDemoMode } from '@/lib/demo/config'
 import type { Database } from '@/lib/supabase.types'
 
 type Personnel = Database['public']['Tables']['personnel']['Row']
 type PersonnelUpdate = Database['public']['Tables']['personnel']['Update']
+
+const PERSONNEL_UPDATED_EVENT = 'currentUserPersonnelUpdated'
+
+type DemoPersonnelChange = {
+  table: string
+  eventType: 'INSERT' | 'UPDATE' | 'DELETE' | 'RESET'
+  new: Personnel | null
+  old: Personnel | null
+}
 
 export function useCurrentUserPersonnel() {
   const [personnel, setPersonnel] = useState<Personnel | null>(null)
@@ -14,9 +24,11 @@ export function useCurrentUserPersonnel() {
   const [error, setError] = useState<string | null>(null)
   const [updating, setUpdating] = useState(false)
   const { user } = useAuth()
+  const userEmail = user?.email
+  const personnelId = personnel?.id
 
   const fetchCurrentUserPersonnel = useCallback(async () => {
-    if (!user?.email) {
+    if (!userEmail) {
       setPersonnel(null)
       setLoading(false)
       return
@@ -29,7 +41,7 @@ export function useCurrentUserPersonnel() {
       const { data, error } = await supabase
         .from('personnel')
         .select('*')
-        .eq('email', user.email)
+        .eq('email', userEmail)
         .single()
       
       if (error) {
@@ -48,10 +60,10 @@ export function useCurrentUserPersonnel() {
     } finally {
       setLoading(false)
     }
-  }, [user?.email])
+  }, [userEmail])
 
   const updatePersonnel = useCallback(async (updates: PersonnelUpdate) => {
-    if (!personnel?.id) {
+    if (!personnelId) {
       throw new Error('No personnel record found to update')
     }
 
@@ -62,7 +74,7 @@ export function useCurrentUserPersonnel() {
       const { data, error } = await supabase
         .from('personnel')
         .update(updates)
-        .eq('id', personnel.id)
+        .eq('id', personnelId)
         .select()
         .single()
 
@@ -71,6 +83,11 @@ export function useCurrentUserPersonnel() {
       }
 
       setPersonnel(data)
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent<Personnel>(PERSONNEL_UPDATED_EVENT, {
+          detail: data,
+        }))
+      }
       return { success: true, data }
     } catch (err) {
       console.error('Error updating personnel:', err)
@@ -80,30 +97,66 @@ export function useCurrentUserPersonnel() {
     } finally {
       setUpdating(false)
     }
-  }, [personnel?.id])
+  }, [personnelId])
 
   useEffect(() => {
-    fetchCurrentUserPersonnel()
+    const fetchTimer = window.setTimeout(() => {
+      void fetchCurrentUserPersonnel()
+    }, 0)
 
     // Listen for avatar update events from other components
     const handleAvatarUpdate = (event: CustomEvent) => {
-      const { personnelId } = event.detail
+      const { personnelId: updatedPersonnelId } = event.detail
       // Only refetch if this event is for the current user
-      if (personnelId === personnel?.id) {
+      if (updatedPersonnelId === personnelId) {
         fetchCurrentUserPersonnel()
+      }
+    }
+
+    // Each component using this hook owns its own state. Keep those instances
+    // synchronized after the profile modal saves a personnel record.
+    const handlePersonnelUpdate = (event: CustomEvent<Personnel>) => {
+      if (event.detail?.email === userEmail) {
+        setPersonnel(event.detail)
       }
     }
 
     if (typeof window !== 'undefined') {
       window.addEventListener('avatarUpdated', handleAvatarUpdate as EventListener)
+      window.addEventListener(PERSONNEL_UPDATED_EVENT, handlePersonnelUpdate as EventListener)
     }
 
     return () => {
+      window.clearTimeout(fetchTimer)
       if (typeof window !== 'undefined') {
         window.removeEventListener('avatarUpdated', handleAvatarUpdate as EventListener)
+        window.removeEventListener(PERSONNEL_UPDATED_EVENT, handlePersonnelUpdate as EventListener)
       }
     }
-  }, [fetchCurrentUserPersonnel, personnel?.id])
+  }, [fetchCurrentUserPersonnel, personnelId, userEmail])
+
+  useEffect(() => {
+    if (!isDemoMode || !userEmail) return
+
+    const handleDemoPersonnelChange = (event: Event) => {
+      const change = (event as CustomEvent<DemoPersonnelChange>).detail
+
+      if (change?.table !== 'personnel') return
+
+      const changedPersonnel = change.new ?? change.old
+      if (changedPersonnel?.email !== userEmail) return
+
+      if (change.eventType === 'DELETE') {
+        setPersonnel(null)
+        return
+      }
+
+      if (change.new) setPersonnel(change.new)
+    }
+
+    window.addEventListener(DEMO_CHANGE_EVENT, handleDemoPersonnelChange)
+    return () => window.removeEventListener(DEMO_CHANGE_EVENT, handleDemoPersonnelChange)
+  }, [userEmail])
 
   return {
     personnel,

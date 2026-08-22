@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import { getQueryClient } from './query-client-optimized'
 import { createOptimizedQueryClient } from './hooks/useOptimizedQueryClient'
 import { runtimeConfig } from './optimization-flags'
-import { isDemoMode } from './demo/config'
+import { DEMO_CHANGE_EVENT, isDemoMode } from './demo/config'
 import { queryKeys } from './supabase-query'
 
 type DemoChange = {
@@ -67,8 +67,8 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
       })
     }
 
-    window.addEventListener('projtrack-demo-change', handleDemoChange)
-    return () => window.removeEventListener('projtrack-demo-change', handleDemoChange)
+    window.addEventListener(DEMO_CHANGE_EVENT, handleDemoChange)
+    return () => window.removeEventListener(DEMO_CHANGE_EVENT, handleDemoChange)
   }, [queryClient])
 
   return (

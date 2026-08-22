@@ -2,6 +2,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/supabase.types'
 import {
+  DEMO_CHANGE_EVENT,
   DEMO_STORAGE_CHANNEL,
   DEMO_STORAGE_KEY,
   DEMO_USER_EMAIL,
@@ -74,7 +75,7 @@ const notifyChannels = (change: DemoChange, broadcast = true) => {
     broadcastChannel?.postMessage(change)
   }
   if (typeof window !== 'undefined') {
-    window.dispatchEvent(new CustomEvent('projtrack-demo-change', { detail: change }))
+    window.dispatchEvent(new CustomEvent(DEMO_CHANGE_EVENT, { detail: change }))
   }
 }
 

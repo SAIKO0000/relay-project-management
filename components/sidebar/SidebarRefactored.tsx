@@ -49,9 +49,9 @@ export function SidebarRefactored({ activeTab, onTabChangeAction }: SidebarProps
   }, [])
 
   const userInfo: UserInfo = useMemo(() => ({
-    userName: user?.user_metadata?.name || "User",
-    userPosition: user?.user_metadata?.position || "Team Member",
-    userEmail: user?.email || "",
+    userName: personnel?.name || user?.user_metadata?.name || "User",
+    userPosition: personnel?.position || user?.user_metadata?.position || "Team Member",
+    userEmail: personnel?.email || user?.email || "",
     avatarUrl: personnel?.avatar_url
   }), [user, personnel])
 
