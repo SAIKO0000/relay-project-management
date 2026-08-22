@@ -23,6 +23,7 @@ import { updateProfilePicture } from "@/lib/profile-picture-service"
 import { toast } from "react-hot-toast"
 import type { Database } from "@/lib/supabase.types"
 import { useModalMobileHide } from "@/lib/modal-mobile-utils"
+import { usePrivateStorageUrl } from "@/lib/hooks/usePrivateStorageUrl"
 
 type Personnel = Database['public']['Tables']['personnel']['Row']
 
@@ -49,6 +50,7 @@ export function ProfileModal({ isOpen, onCloseAction, personnel: viewingPersonne
   // If viewingPersonnel is provided, show that personnel's profile
   // Otherwise, show current user's profile (for editing)
   const displayedPersonnel = viewingPersonnel || currentUserPersonnel
+  const resolvedAvatarUrl = usePrivateStorageUrl('avatars', displayedPersonnel?.avatar_url)
   const isOwnProfile = !viewingPersonnel || (viewingPersonnel?.email === user?.email)
   const loading = viewingPersonnel ? false : currentUserLoading
 
@@ -76,7 +78,7 @@ export function ProfileModal({ isOpen, onCloseAction, personnel: viewingPersonne
   // Initialize form data when modal opens or personnel data changes
   useEffect(() => {
     if (isOpen && displayedPersonnel) {
-      initializeFormData()
+      queueMicrotask(initializeFormData)
     }
   }, [isOpen, displayedPersonnel, initializeFormData])
 
@@ -206,7 +208,7 @@ export function ProfileModal({ isOpen, onCloseAction, personnel: viewingPersonne
                     <div className="absolute -inset-1 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full blur opacity-25 group-hover:opacity-40 transition duration-300"></div>
                     <Avatar className="relative h-14 w-14 ring-2 ring-white/80 shadow-lg rounded-full">
                       <AvatarImage 
-                        src={displayedPersonnel?.avatar_url || ""} 
+                        src={resolvedAvatarUrl}
                         alt={userName}
                         className="object-cover rounded-full"
                       />
@@ -287,7 +289,7 @@ export function ProfileModal({ isOpen, onCloseAction, personnel: viewingPersonne
                 <div className="relative group">
                   <div className="absolute -inset-1 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full blur opacity-20 group-hover:opacity-30 transition duration-300"></div>
                   <Avatar className="relative h-14 w-14 ring-2 ring-white/80 shadow-lg rounded-full">
-                    <AvatarImage src={displayedPersonnel?.avatar_url || ""} alt={userName} className="object-cover rounded-full" />
+                    <AvatarImage src={resolvedAvatarUrl} alt={userName} className="object-cover rounded-full" />
                     <AvatarFallback className="bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm font-bold rounded-full">
                       {getInitials(userName)}
                     </AvatarFallback>

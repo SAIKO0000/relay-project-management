@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../supabase'
 import type { Database } from '../supabase.types'
 import { toast } from 'react-hot-toast'
+import { getActiveWorkspaceId, workspaceStoragePath } from '@/lib/workspace'
 
 type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]
 type Report = Database['public']['Tables']['reports']['Row']
@@ -212,7 +213,8 @@ export function useReports() {
       const timestamp = Date.now()
       const randomId = Math.random().toString(36).substring(2)
       const fileName = `${projectId}_${timestamp}_${randomId}.${fileExt}`
-      const filePath = `reports/${projectId}/${fileName}`
+      const workspaceId = await getActiveWorkspaceId()
+      const filePath = workspaceStoragePath(workspaceId, 'reports', projectId, fileName)
 
       // Normalize MIME type for better compatibility
       const normalizedMimeType = normalizeMimeType(file)
@@ -331,11 +333,11 @@ export function useReports() {
     }
   }
 
-  const getReportUrl = (filePath: string) => {
-    const { data } = supabase.storage
+  const getReportUrl = async (filePath: string) => {
+    const { data, error } = await supabase.storage
       .from('project-documents')
-      .getPublicUrl(filePath)
-    return data.publicUrl
+      .createSignedUrl(filePath, 900)
+    return error ? '' : data.signedUrl
   }
 
   const downloadReport = async (report: Report) => {
@@ -497,7 +499,8 @@ export function useReports() {
       const timestamp = Date.now()
       const randomId = Math.random().toString(36).substring(2)
       const fileName = `${projectId}_${timestamp}_${randomId}.${fileExt}`
-      const filePath = `reports/${projectId}/${fileName}`
+      const workspaceId = await getActiveWorkspaceId()
+      const filePath = workspaceStoragePath(workspaceId, 'reports', projectId, fileName)
 
       // Normalize MIME type for better compatibility
       const normalizedMimeType = normalizeMimeType(file)

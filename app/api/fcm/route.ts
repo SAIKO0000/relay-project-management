@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAuthenticatedRouteContext } from '@/lib/supabase/route-auth'
 
 const unavailableInDemo = () => process.env.NEXT_PUBLIC_DEMO_MODE !== 'false'
 
@@ -8,16 +9,22 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const auth = await getAuthenticatedRouteContext(request)
+    if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
     const { token } = await request.json();
     
-    if (!token) {
+    if (typeof token !== 'string' || token.length < 20 || token.length > 4096) {
       return NextResponse.json({ error: 'FCM token is required' }, { status: 400 });
     }
 
-    // For now, we'll just acknowledge the token
-    // In production, you would store this in a database
-    // TODO: Store token in fcm_tokens table when database migration is run
-    // Never log push tokens; they are credentials for a specific browser installation.
+    const { error } = await auth.supabase
+      .from('fcm_tokens')
+      .upsert({ user_id: auth.user.id, token }, { onConflict: 'user_id' })
+
+    if (error) {
+      return NextResponse.json({ error: 'Unable to save push subscription' }, { status: 500 })
+    }
 
     return NextResponse.json({ 
       success: true, 
@@ -35,15 +42,19 @@ export async function DELETE(request: NextRequest) {
   }
 
   try {
-    const { userId } = await request.json();
+    const auth = await getAuthenticatedRouteContext(request)
+    if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     
-    if (!userId) {
-      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+    const { error } = await auth.supabase
+      .from('fcm_tokens')
+      .delete()
+      .eq('user_id', auth.user.id)
+
+    if (error) {
+      return NextResponse.json({ error: 'Unable to remove push subscription' }, { status: 500 })
     }
 
-    // For now, we'll just acknowledge the deletion
-    // TODO: Delete token from fcm_tokens table when database migration is run
-    return NextResponse.json({ success: true, message: 'FCM token deletion acknowledged' });
+    return NextResponse.json({ success: true, message: 'Push subscription removed' });
   } catch (error) {
     console.error('FCM token deletion error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

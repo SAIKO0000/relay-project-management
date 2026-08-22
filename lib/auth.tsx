@@ -8,6 +8,7 @@ import { clearAuthStorage, handleAuthError } from './auth-utils'
 import { supabase } from './supabase'
 import { isDemoMode } from './demo/config'
 import { resetDemoData } from './demo/supabase-client'
+import { clearWorkspaceCache } from './workspace'
 
 export { supabase }
 
@@ -193,76 +194,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return { success: false, error: 'Account creation is disabled in browser-local Demo Mode.' }
     }
 
-    try {
-      setLoading(true)
-      
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/confirm`,
-          data: {
-            name: userData.name,
-            position: userData.position,
-            phone: userData.phone,
-          }
-        }
-      })
-
-      if (error) {
-        return { success: false, error: error.message }
-      }
-
-      // Try to create a personnel record (optional - don't fail signup if this fails)
-      if (data.user) {
-        try {
-          // Prepare data - ensure empty strings become null
-          const personnelData = {
-            name: userData.name.trim(),
-            email: email.trim(),
-            position: userData.position?.trim() || null,
-            phone: userData.phone?.trim() || null,
-          }
-          
-          // Use upsert to handle potential duplicates
-          const { error: personnelError } = await supabase
-            .from('personnel')
-            .upsert(personnelData, { 
-              onConflict: 'email',
-              ignoreDuplicates: false 
-            })
-
-          if (personnelError) {
-            console.warn('Personnel record creation failed (non-critical):', personnelError)
-            // Don't throw - this is optional and shouldn't block signup
-          } else {
-            console.log('Personnel record created successfully')
-          }
-        } catch (personnelCreateError) {
-          console.warn('Personnel table error:', personnelCreateError)
-          // Continue with signup even if personnel record creation fails
-        }
-      }
-
-      toast.success('Account created successfully! Please check your email to verify your account.', {
-        duration: 1000,
-        style: {
-          background: 'linear-gradient(to right, #f97316, #ea580c)',
-          color: 'white',
-        },
-      })
-
-      router.push('/auth/login')
-      return { success: true }
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred'
-      return { success: false, error: errorMessage }
-    } finally {
-      setLoading(false)
-    }
-  }, [router])
+    // Private beta accounts are created only by a trusted Supabase invitation.
+    // Keeping this guard in the auth layer prevents accidental self-signup even
+    // if somebody reaches the legacy signup component directly.
+    void email
+    void password
+    void userData
+    return { success: false, error: 'This private beta is invitation-only.' }
+  }, [])
 
   const signOut = useCallback(async () => {
+    clearWorkspaceCache()
     if (isDemoMode) {
       resetDemoData()
       toast.success('Demo data reset successfully')

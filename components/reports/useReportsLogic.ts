@@ -69,13 +69,13 @@ export function useReportsLogic() {
     }
   }, [reports])
   
-  const getReportUrl = useCallback((filePath: string) => {
+  const getReportUrl = useCallback(async (filePath: string) => {
     try {
-      const { data } = supabase.storage
+      const { data, error } = await supabase.storage
         .from('project-documents')
-        .getPublicUrl(filePath)
+        .createSignedUrl(filePath, 900)
         
-      return data?.publicUrl || null
+      return error ? null : data?.signedUrl || null
     } catch (error) {
       console.error('Error creating public URL:', error)
       return null
@@ -240,12 +240,12 @@ export function useReportsLogic() {
 
   const handleView = async (report: EnhancedReport) => {
     try {
-      const { data } = supabase.storage
+      const { data } = await supabase.storage
         .from('project-documents')
-        .getPublicUrl(report.file_path)
+        .createSignedUrl(report.file_path, 900)
       
-      if (data?.publicUrl) {
-        window.open(data.publicUrl, '_blank')
+      if (data?.signedUrl) {
+        window.open(data.signedUrl, '_blank', 'noopener,noreferrer')
         toast.success("Opening file...")
       } else {
         toast.error("Unable to view file")
@@ -268,7 +268,7 @@ export function useReportsLogic() {
 
   const handleShare = async (report: EnhancedReport) => {
     try {
-      const shareUrl = getReportUrl(report.file_path)
+      const shareUrl = await getReportUrl(report.file_path)
       
       if (!shareUrl) {
         toast.error("Unable to generate share link")

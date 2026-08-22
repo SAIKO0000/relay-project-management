@@ -19,6 +19,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const { signIn } = useAuth()
+  const publicDemoUrl = process.env.NEXT_PUBLIC_PUBLIC_DEMO_URL
 
   // Set dynamic page title
   useEffect(() => {
@@ -33,8 +34,10 @@ export default function LoginPage() {
     // Passwords must never be persisted in localStorage.
     localStorage.removeItem('gyg-remembered-password')
     if (savedEmail && wasRemembered) {
-      setEmail(savedEmail)
-      setRememberMe(true)
+      queueMicrotask(() => {
+        setEmail(savedEmail)
+        setRememberMe(true)
+      })
     }
   }, [])
 
@@ -202,25 +205,20 @@ export default function LoginPage() {
                 )}
               </Button>
 
-              {/* Divider */}
-              <div className="relative py-4">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-gray-300" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-2 text-gray-500">New to GYG Power Systems?</span>
-                </div>
+              <div className="rounded-lg border border-orange-200 bg-orange-50 p-3 text-center text-sm text-orange-900">
+                Private beta access is invitation-only. Approved testers receive an email invitation.
               </div>
 
-              {/* Sign Up Link */}
-              <div className="text-center">
-                <Link 
-                  href="/auth/signup"
-                  className="text-orange-600 hover:text-orange-700 font-medium transition-colors duration-200"
-                >
-                  Create an account
-                </Link>
-              </div>
+              {publicDemoUrl && (
+                <div className="text-center">
+                  <Link
+                    href={publicDemoUrl}
+                    className="text-orange-600 hover:text-orange-700 font-medium transition-colors duration-200"
+                  >
+                    Open the browser-local public demo
+                  </Link>
+                </div>
+              )}
             </form>
           </CardContent>
         </Card>

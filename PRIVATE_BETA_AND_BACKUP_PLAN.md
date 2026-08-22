@@ -2,6 +2,31 @@
 
 Last reviewed: August 23, 2026
 
+## Implementation status
+
+Work is isolated on `feature/private-beta-auth`. The following foundation is implemented locally but **has not been applied to either remote Supabase project or deployed to Vercel**:
+
+- `supabase/migrations/202608230001_private_beta_workspaces.sql` creates personal workspaces, membership roles, automatic invited-user provisioning, non-null tenant keys, workspace RLS, private Storage buckets, workspace/user-scoped object policies, and security-invoker views.
+- Next.js 16 now uses `@supabase/ssr` cookie sessions in live-backend mode. The deprecated `@supabase/auth-helpers-nextjs` dependency was removed.
+- `proxy.ts` verifies private sessions with `getUser()`, protects application pages, and redirects the legacy signup page to the invitation-only login.
+- API routes that read or mutate user data use a caller-scoped Supabase client so RLS applies to their queries.
+- New reports, photos, attachments, and avatars use private workspace/user paths and signed URLs instead of permanent public URLs.
+- `scripts/verify-private-beta-security.sql` fails when a tenant table lacks RLS/non-null workspace ownership, a broad/anonymous policy remains, an application bucket is public, or an exposed view bypasses RLS.
+
+The public demo remains the production-safe version on `main`; `NEXT_PUBLIC_DEMO_MODE=true` bypasses live auth and continues using browser-local fictional data.
+
+### Required validation before any remote change
+
+1. Export the candidate `GYG_ProjTrack's Project` database and Storage objects.
+2. Restore the export into a disposable/local Supabase environment.
+3. Apply the workspace migration there first. A migration error rolls the transaction back; do not weaken the failing check to force it through.
+4. Run `scripts/verify-private-beta-security.sql`.
+5. Test with two unrelated invited accounts: each must receive a different default workspace and must be unable to read, update, delete, subscribe to, download, or guess the other account's rows/files.
+6. Test two controlled accounts in one deliberately shared workspace to verify collaboration.
+7. Regenerate `lib/supabase.types.ts` from the migrated schema and resolve the repository's existing strict-TypeScript debt before treating the beta as production-grade.
+
+Only after those checks pass should the migration be applied to the candidate private project and a second Vercel project be created.
+
 ## Decision
 
 Keep one repository and one maintained codebase, with two isolated deployments:

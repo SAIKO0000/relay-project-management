@@ -18,20 +18,28 @@ function ConfirmPageContent() {
     const handleEmailConfirmation = async () => {
       try {
         // Get URL parameters
-        const token = searchParams.get('token')
+        const token = searchParams.get('token_hash') || searchParams.get('token')
+        const code = searchParams.get('code')
         const type = searchParams.get('type')
+        const requestedNext = searchParams.get('next')
+        const safeNext = requestedNext?.startsWith('/') && !requestedNext.startsWith('//')
+          ? requestedNext
+          : type === 'invite' || type === 'recovery'
+            ? '/auth/reset-password'
+            : '/'
 
-        if (!token) {
+        if (!token && !code) {
           setStatus('error')
           setMessage('Invalid confirmation link')
           return
         }
 
-        // Verify the user
-        const { data, error } = await supabase.auth.verifyOtp({
-          token_hash: token,
-          type: (type as 'signup' | 'recovery' | 'invite' | 'magiclink') || 'signup'
-        })
+        const { data, error } = code
+          ? await supabase.auth.exchangeCodeForSession(code)
+          : await supabase.auth.verifyOtp({
+              token_hash: token!,
+              type: (type as 'signup' | 'recovery' | 'invite' | 'magiclink') || 'invite'
+            })
 
         if (error) {
           setStatus('error')
@@ -41,12 +49,15 @@ function ConfirmPageContent() {
 
         if (data.user) {
           setStatus('success')
-          setMessage('Your email has been confirmed successfully!')
+          setMessage(type === 'invite'
+            ? 'Invitation accepted. Choose a password to finish setting up your account.'
+            : 'Your email has been confirmed successfully!')
           
-          // Auto-redirect to the main app after 3 seconds
+          // Invitation and recovery flows must set a password before entering
+          // the app. Normal confirmations can continue to the requested page.
           setTimeout(() => {
-            router.push('/')
-          }, 3000)
+            router.replace(safeNext)
+          }, 1200)
         }
       } catch (error) {
         setStatus('error')
@@ -107,16 +118,20 @@ function ConfirmPageContent() {
                   {message}
                 </p>
                 <p className="text-xs text-green-700 text-center mt-2">
-                  You&apos;ll be redirected to the application in a few seconds...
+                  You&apos;ll be redirected securely in a moment...
                 </p>
               </div>
               <div className="text-center">
                 <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                 <Button 
-                  onClick={() => router.push('/')}
+                  onClick={() => router.replace(
+                    searchParams.get('type') === 'invite' || searchParams.get('type') === 'recovery'
+                      ? '/auth/reset-password'
+                      : '/'
+                  )}
                   className="w-full bg-orange-600 hover:bg-orange-700"
                 >
-                  Continue to Application
+                  Continue
                 </Button>
               </div>
             </div>

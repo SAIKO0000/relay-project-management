@@ -3,6 +3,12 @@ import { useEffect, useMemo, useState } from 'react'
 import { supabase, queryKeys } from '@/lib/supabase-query'
 import type { Database } from '@/lib/supabase.types'
 import { useAuth } from '@/lib/auth'
+import {
+  getActiveWorkspaceId,
+  getCachedPrivateStorageUrl,
+  getPrivateStorageUrl,
+  workspaceStoragePath,
+} from '@/lib/workspace'
 
 type Photo = Database['public']['Tables']['photos']['Row'] & {
   project?: { id: string; name: string }
@@ -37,11 +43,12 @@ export function usePhotosOptimized(projectId?: string) {
       }
       
       // The view already includes uploader names, so we can use them directly
-      const photosWithNames = (data || []).map(photo => ({
+      const photosWithNames = await Promise.all((data || []).map(async (photo) => ({
         ...photo,
         project: photo.project_name ? { id: photo.project_id, name: photo.project_name } : undefined,
-        uploader_name: photo.uploader_name || 'Unknown User'
-      }))
+        uploader_name: photo.uploader_name || 'Unknown User',
+        signed_url: await getPrivateStorageUrl('project-photos', photo.storage_path),
+      })))
       
       console.log('Fetched photos with uploader names:', photosWithNames)
       return photosWithNames
@@ -178,13 +185,19 @@ export function usePhotoOperations() {
       setUploading(true)
       setUploadProgress(0)
       const uploadedPhotos: Photo[] = []
+      const workspaceId = await getActiveWorkspaceId()
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
         setUploadProgress((i / files.length) * 100)
 
         // Upload to storage
-        const fileName = `${Date.now()}-${file.name}`
+        const fileExtension = file.name.split('.').pop() || 'jpg'
+        const fileName = workspaceStoragePath(
+          workspaceId,
+          'photos',
+          `${Date.now()}-${crypto.randomUUID()}.${fileExtension}`
+        )
         console.log('Uploading file:', fileName, 'to storage bucket: project-photos')
         
         const { data: storageData, error: storageError } = await supabase.storage
@@ -195,6 +208,7 @@ export function usePhotoOperations() {
           console.error('Storage upload error:', storageError)
           throw storageError
         }
+        await getPrivateStorageUrl('project-photos', storageData.path)
         
         console.log('Upload successful, storage data:', storageData)
 
@@ -256,13 +270,7 @@ export function usePhotoOperations() {
       return ''
     }
     
-    // Try public URL first
-    const { data } = supabase.storage.from('project-photos').getPublicUrl(storagePath)
-    console.log('Generated photo URL:', data.publicUrl, 'for path:', storagePath)
-    
-    // If the public URL doesn't work, we might need to check if the bucket is public
-    // or use signed URLs for private buckets
-    return data.publicUrl
+    return getCachedPrivateStorageUrl('project-photos', storagePath)
   }
 
   // Alternative method for signed URLs (if the bucket is private)
