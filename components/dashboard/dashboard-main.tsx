@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useCallback } from "react"
-import { type Project } from "@/lib/supabase"
+import { supabase, type Project } from "@/lib/supabase"
 import { EditProjectModal } from "@/components/edit-project-modal"
 import { ContentSkeleton } from "@/components/ui/content-skeleton"
 import { toast } from "react-hot-toast"
@@ -63,15 +63,8 @@ export function Dashboard() {
   const handleDeleteProject = useCallback(async (projectId: string, projectName: string) => {
     if (confirm(`Are you sure you want to delete the project "${projectName}"? This action cannot be undone.`)) {
       try {
-        // We need to import deleteProject from the optimized hook or create a mutation
-        // For now, we'll use the direct Supabase call and let TanStack Query handle the cache
-        const response = await fetch('/api/projects', {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: projectId })
-        })
-        
-        if (!response.ok) throw new Error('Failed to delete project')
+        const { error } = await supabase.from('projects').delete().eq('id', projectId)
+        if (error) throw error
         
         // Invalidate and refetch projects
         await refetchProjects()

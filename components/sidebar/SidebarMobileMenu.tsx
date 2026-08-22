@@ -36,9 +36,9 @@ export function SidebarMobileMenu({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] lg:hidden" onClick={onToggleMobileMenuAction}>
+    <div className="fixed inset-0 bg-black/50 z-[100] lg:hidden" onClick={onToggleMobileMenuAction}>
       <div 
-        className="fixed left-0 top-0 h-full w-64 bg-white/95 backdrop-blur-md shadow-lg z-[110] transform transition-transform duration-300 flex flex-col"
+        className="fixed left-0 top-0 h-full w-64 bg-white shadow-lg z-[110] transform transition-transform duration-200 ease-out motion-reduce:transition-none flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-4 border-b border-gray-200/60">

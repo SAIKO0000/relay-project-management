@@ -231,6 +231,10 @@ ALTER TABLE public.milestones
 -- ROW LEVEL SECURITY (RLS)
 -- ===========================================
 
+-- WARNING: the broad collaboration policies below are legacy development
+-- defaults and are not suitable for an internet-facing portfolio. After
+-- restoring a dedicated portfolio project, run sql/portfolio_demo_lockdown.sql.
+
 -- Enable RLS on all tables
 ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;

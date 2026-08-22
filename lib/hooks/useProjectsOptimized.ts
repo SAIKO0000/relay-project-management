@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useMemo } from 'react'
 import { supabase, queryKeys } from '@/lib/supabase-query'
 import { createSmartInvalidation } from './useSmartInvalidation'
 import type { Project, Personnel, Task } from '@/lib/supabase'
@@ -10,7 +10,7 @@ type ProjectUpdate = Partial<ProjectInsert>
 // Enhanced Projects Query Hook with Realtime Subscriptions
 export function useProjectsQuery() {
   const queryClient = useQueryClient()
-  const smartInvalidation = createSmartInvalidation(queryClient)
+  const smartInvalidation = useMemo(() => createSmartInvalidation(queryClient), [queryClient])
 
   const query = useQuery({
     queryKey: queryKeys.projects(),

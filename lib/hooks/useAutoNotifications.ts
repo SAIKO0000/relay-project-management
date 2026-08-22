@@ -4,6 +4,7 @@ import { useFCM } from '@/lib/hooks/useFCM';
 import { MobileNotificationService } from '@/lib/mobile-notification-service';
 import { enhancedNotificationService } from '@/lib/enhanced-notification-service';
 import { toast } from 'react-hot-toast';
+import { isDemoMode } from '@/lib/demo/config';
 
 /**
  * Hook to automatically trigger notifications after user login
@@ -34,6 +35,12 @@ export const useAutoNotifications = () => {
     
     if (!user || !session) {
       console.log('❌ No user or session, skipping notifications');
+      return;
+    }
+
+    if (isDemoMode) {
+      // Keep the public walkthrough quiet on startup. Testers can inspect
+      // deadline data deliberately from the Notifications screen.
       return;
     }
 

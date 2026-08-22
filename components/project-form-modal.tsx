@@ -7,7 +7,6 @@ import * as z from "zod"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -47,6 +46,7 @@ import { cn } from "@/lib/utils"
 import { useCreateProject } from "@/lib/hooks/useProjectsOptimized"
 import { toast } from "react-hot-toast"
 import { useModalMobileHide } from "@/lib/modal-mobile-utils"
+import { isDemoMode } from "@/lib/demo/config"
 
 const projectSchema = z.object({
   name: z.string().min(1, "Project name is required").max(255, "Name too long"),
@@ -106,10 +106,15 @@ export function ProjectFormModal({ onProjectCreated }: ProjectFormModalProps) {
 
   const startDate = watch("start_date")
   const endDate = watch("end_date")
-  const locationValue = watch("location")
-
   // Geoapify location search
   const searchLocations = async (query: string) => {
+    const geoapifyKey = process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY
+    if (isDemoMode || !geoapifyKey) {
+      setLocationSuggestions([])
+      setShowLocationDropdown(false)
+      return
+    }
+
     if (query.length < 3) {
       setLocationSuggestions([])
       setShowLocationDropdown(false)
@@ -119,7 +124,7 @@ export function ProjectFormModal({ onProjectCreated }: ProjectFormModalProps) {
     setIsLoadingLocations(true)
     try {
       const response = await fetch(
-        `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(query)}&apiKey=dfa060e748234ad18917ceba6bf3cfb3&filter=countrycode:ph`,
+        `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(query)}&apiKey=${geoapifyKey}&filter=countrycode:ph`,
         { method: 'GET' }
       )
       
@@ -216,7 +221,7 @@ export function ProjectFormModal({ onProjectCreated }: ProjectFormModalProps) {
           New Project
         </Button>
       </DialogTrigger>      
-      <DialogContent className="sm:max-w-[500px] max-w-[95vw] w-[95vw] sm:w-auto max-h-[85vh] sm:max-h-[80vh] overflow-y-auto bg-white/95 backdrop-blur-sm border border-gray-200/50 shadow-2xl rounded-xl">
+      <DialogContent className="sm:max-w-[500px] max-w-[95vw] w-[95vw] sm:w-auto max-h-[85vh] sm:max-h-[80vh] overflow-y-auto bg-white border border-gray-200/50 shadow-xl rounded-xl">
         <DialogHeader className="space-y-1 sm:space-y-2 p-2 sm:p-3 border-b border-gray-100">
           <DialogTitle className="text-base sm:text-lg font-bold text-gray-900 flex flex-col sm:flex-row items-center sm:items-start">
             <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center mb-2 sm:mb-0 sm:mr-3 shadow-lg">
@@ -497,7 +502,7 @@ export function ProjectFormModal({ onProjectCreated }: ProjectFormModalProps) {
               variant="outline"
               onClick={() => setOpen(false)}
               disabled={isSubmitting}
-              className="h-8 sm:h-10 px-3 sm:px-4 border-gray-200 hover:border-gray-300 hover:bg-gray-50 rounded-lg font-medium transition-all duration-200 text-xs sm:text-sm"
+              className="h-8 sm:h-10 px-3 sm:px-4 border-gray-200 hover:border-gray-300 hover:bg-gray-50 rounded-lg font-medium transition-colors duration-150 motion-reduce:transition-none text-xs sm:text-sm"
             >
               <X className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
               Cancel
@@ -505,7 +510,7 @@ export function ProjectFormModal({ onProjectCreated }: ProjectFormModalProps) {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="h-8 sm:h-10 px-4 sm:px-6 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 text-xs sm:text-sm"
+              className="h-8 sm:h-10 px-4 sm:px-6 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg font-medium shadow-md transition-colors duration-150 motion-reduce:transition-none text-xs sm:text-sm"
             >
               {isSubmitting ? (
                 <>

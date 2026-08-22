@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+const unavailableInDemo = () => process.env.NEXT_PUBLIC_DEMO_MODE !== 'false'
+
 export async function POST(request: NextRequest) {
+  if (unavailableInDemo()) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  }
+
   try {
-    const { token, userId } = await request.json();
+    const { token } = await request.json();
     
     if (!token) {
       return NextResponse.json({ error: 'FCM token is required' }, { status: 400 });
@@ -11,12 +17,11 @@ export async function POST(request: NextRequest) {
     // For now, we'll just acknowledge the token
     // In production, you would store this in a database
     // TODO: Store token in fcm_tokens table when database migration is run
-    console.log('FCM Token received for user:', userId, 'Token:', token.substring(0, 20) + '...');
+    // Never log push tokens; they are credentials for a specific browser installation.
 
     return NextResponse.json({ 
       success: true, 
-      message: 'FCM token received successfully',
-      tokenPreview: token.substring(0, 20) + '...'
+      message: 'FCM token received successfully'
     });
   } catch (error) {
     console.error('FCM token storage error:', error);
@@ -25,6 +30,10 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  if (unavailableInDemo()) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  }
+
   try {
     const { userId } = await request.json();
     
@@ -34,8 +43,6 @@ export async function DELETE(request: NextRequest) {
 
     // For now, we'll just acknowledge the deletion
     // TODO: Delete token from fcm_tokens table when database migration is run
-    console.log('FCM Token deletion requested for user:', userId);
-
     return NextResponse.json({ success: true, message: 'FCM token deletion acknowledged' });
   } catch (error) {
     console.error('FCM token deletion error:', error);

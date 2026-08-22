@@ -1270,3 +1270,31 @@
     display: none !important;
   }
 }
+
+/* Keep interaction feedback crisp on lower-power devices. Most surfaces are
+   already opaque, so backdrop filtering only adds repaint cost. */
+[data-performance-mode="true"] [class*="backdrop-blur"] {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+[data-performance-mode="true"] [class*="transition-all"] {
+  transition-property: color, background-color, border-color, opacity, box-shadow, transform !important;
+}
+
+[data-performance-mode="true"] [class*="duration-200"],
+[data-performance-mode="true"] [class*="duration-300"],
+[data-performance-mode="true"] [class*="duration-500"] {
+  transition-duration: 100ms !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-performance-mode="true"] *,
+  [data-performance-mode="true"] *::before,
+  [data-performance-mode="true"] *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

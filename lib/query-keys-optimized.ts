@@ -1,48 +1,48 @@
-// Unified query key factory for consistent TanStack Query caching
-// This centralizes all query keys to prevent cache invalidation issues
+// Unified query key factory for consistent TanStack Query caching.
+// Keep the shared keys identical to supabase-query.ts. The app historically had
+// two roots (`data` and `projtrack`), which meant mutations/realtime updated a
+// cache the visible screens were not reading.
+import { queryKeys as baseQueryKeys } from './supabase-query'
 
 export const queryKeys = {
-  // Root keys
-  all: ['projtrack'] as const,
+  ...baseQueryKeys,
   
   // Dashboard
-  dashboard: () => [...queryKeys.all, 'dashboard'] as const,
-  dashboardStats: () => [...queryKeys.all, 'dashboard', 'stats'] as const,
+  dashboard: baseQueryKeys.dashboard,
+  dashboardStats: baseQueryKeys.dashboardStats,
   
   // Projects
-  projects: () => [...queryKeys.all, 'projects'] as const,
-  project: (id: string) => [...queryKeys.projects(), id] as const,
-  projectTasks: (id: string) => [...queryKeys.project(id), 'tasks'] as const,
+  projects: baseQueryKeys.projects,
+  project: baseQueryKeys.project,
+  projectTasks: baseQueryKeys.projectTasks,
   
   // Tasks
-  tasks: () => [...queryKeys.all, 'tasks'] as const,
-  task: (id: string) => [...queryKeys.tasks(), id] as const,
-  tasksByProject: (projectId: string) => [...queryKeys.tasks(), 'project', projectId] as const,
-  tasksByAssignee: (assigneeId: string) => [...queryKeys.tasks(), 'assignee', assigneeId] as const,
-  ganttTasks: (projectId?: string) => projectId 
-    ? [...queryKeys.tasks(), 'gantt', projectId] as const
-    : [...queryKeys.tasks(), 'gantt'] as const,
+  tasks: baseQueryKeys.tasks,
+  task: baseQueryKeys.task,
+  tasksByProject: baseQueryKeys.tasksByProject,
+  tasksByAssignee: (assigneeId: string) => [...baseQueryKeys.tasks(), 'assignee', assigneeId] as const,
+  ganttTasks: baseQueryKeys.ganttTasks,
   
   // Personnel
-  personnel: () => [...queryKeys.all, 'personnel'] as const,
-  person: (id: string) => [...queryKeys.personnel(), id] as const,
+  personnel: baseQueryKeys.personnel,
+  person: baseQueryKeys.person,
   
   // Reports
-  reports: () => [...queryKeys.all, 'reports'] as const,
-  report: (id: string) => [...queryKeys.reports(), id] as const,
-  reportsByProject: (projectId: string) => [...queryKeys.reports(), 'project', projectId] as const,
-  reportsByUploader: (uploaderId: string) => [...queryKeys.reports(), 'uploader', uploaderId] as const,
+  reports: baseQueryKeys.reports,
+  report: baseQueryKeys.report,
+  reportsByProject: baseQueryKeys.reportsByProject,
+  reportsByUploader: (uploaderId: string) => [...baseQueryKeys.reports(), 'uploader', uploaderId] as const,
 
   // Events
-  events: () => [...queryKeys.all, 'events'] as const,
-  event: (id: string) => [...queryKeys.events(), id] as const,
-  eventsByProject: (projectId: string) => [...queryKeys.events(), 'project', projectId] as const,
-  eventsByDate: (date: string) => [...queryKeys.events(), 'date', date] as const,
+  events: baseQueryKeys.events,
+  event: baseQueryKeys.event,
+  eventsByProject: baseQueryKeys.eventsByProject,
+  eventsByDate: baseQueryKeys.eventsByDate,
 
   // Photos
-  photos: () => [...queryKeys.all, 'photos'] as const,
-  photo: (id: string) => [...queryKeys.photos(), id] as const,
-  photosByProject: (projectId: string) => [...queryKeys.photos(), 'project', projectId] as const,
+  photos: baseQueryKeys.photos,
+  photo: baseQueryKeys.photo,
+  photosByProject: baseQueryKeys.photosByProject,
 
   // Auth/User
   user: () => [...queryKeys.all, 'user'] as const,

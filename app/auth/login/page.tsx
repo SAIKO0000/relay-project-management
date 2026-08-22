@@ -28,12 +28,12 @@ export default function LoginPage() {
   // Load saved credentials on component mount
   useEffect(() => {
     const savedEmail = localStorage.getItem('gyg-remembered-email')
-    const savedPassword = localStorage.getItem('gyg-remembered-password')
     const wasRemembered = localStorage.getItem('gyg-remember-me') === 'true'
     
-    if (savedEmail && savedPassword && wasRemembered) {
+    // Passwords must never be persisted in localStorage.
+    localStorage.removeItem('gyg-remembered-password')
+    if (savedEmail && wasRemembered) {
       setEmail(savedEmail)
-      setPassword(savedPassword)
       setRememberMe(true)
     }
   }, [])
@@ -53,12 +53,10 @@ export default function LoginPage() {
         // Save credentials if remember me is checked
         if (rememberMe) {
           localStorage.setItem('gyg-remembered-email', email)
-          localStorage.setItem('gyg-remembered-password', password)
           localStorage.setItem('gyg-remember-me', 'true')
         } else {
           // Clear saved credentials if remember me is not checked
           localStorage.removeItem('gyg-remembered-email')
-          localStorage.removeItem('gyg-remembered-password')
           localStorage.removeItem('gyg-remember-me')
         }
       } else if (error) {

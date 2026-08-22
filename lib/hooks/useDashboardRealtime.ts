@@ -1,34 +1,35 @@
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useMemo, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { queryKeys } from '@/lib/supabase-query'
 import { createSmartInvalidation } from '@/lib/hooks/useSmartInvalidation'
 import { getAffectedQueryKeys } from '@/lib/query-keys-optimized'
 import { toast } from 'react-hot-toast'
+import { isDemoMode } from '@/lib/demo/config'
 
 // Real-time Dashboard Sync Hook
 export function useDashboardRealtime() {
   const queryClient = useQueryClient()
-  const smartInvalidation = createSmartInvalidation(queryClient)
+  const smartInvalidation = useMemo(() => createSmartInvalidation(queryClient), [queryClient])
+  const lastNotificationRef = useRef(0)
 
   // Throttled notification function to prevent spam
   const throttledNotification = useCallback(
-    (() => {
-      let lastNotification = 0
-      const throttleTime = 3000 // 3 seconds
-
-      return (message: string, type: 'success' | 'info' = 'info') => {
+    (message: string, type: 'success' | 'info' = 'info') => {
+        // Demo mutations already show a direct success message. Realtime toasts
+        // duplicate it and make ordinary actions feel like system alerts.
+        if (isDemoMode) return
         const now = Date.now()
-        if (now - lastNotification > throttleTime) {
-          lastNotification = now
+        const throttleTime = 3000
+        if (now - lastNotificationRef.current > throttleTime) {
+          lastNotificationRef.current = now
           if (type === 'success') {
             toast.success(message)
           } else {
             toast(message, { icon: '🔄' })
           }
         }
-      }
-    })(),
+      },
     []
   )
 

@@ -56,7 +56,7 @@ export function SidebarNavigation({
         <Button
           key={item.id}
           variant={activeTab === item.id ? "default" : "ghost"}
-          className={`w-full justify-center transition-all duration-300 group relative overflow-hidden ${
+          className={`w-full justify-center transition-colors duration-150 motion-reduce:transition-none group relative overflow-hidden ${
             activeTab === item.id
               ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 shadow-md shadow-orange-500/20 scale-[1.02]"
               : "text-gray-700 hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 hover:text-orange-700 hover:shadow-sm hover:border-orange-200/50 border border-transparent hover:scale-[1.01]"
@@ -64,12 +64,12 @@ export function SidebarNavigation({
           onClick={() => onTabChangeAction(item.id)}
           title={collapsed ? item.label : undefined}
         >
-          <item.icon className={`transition-all duration-300 group-hover:scale-105 ${collapsed ? "h-5 w-5" : "h-4 w-4 mr-3"} ${activeTab === item.id ? "drop-shadow-sm" : ""}`} />
+          <item.icon className={`${collapsed ? "h-5 w-5" : "h-4 w-4 mr-3"} ${activeTab === item.id ? "drop-shadow-sm" : ""}`} />
           {!collapsed && (
             <>
-              <span className="flex-1 text-left font-medium text-sm transition-all duration-200">{item.label}</span>
+              <span className="flex-1 text-left font-medium text-sm">{item.label}</span>
               {item.badge && (
-                <Badge variant="secondary" className="ml-auto bg-orange-100 text-orange-700 shadow-sm border border-orange-200/50 transition-all duration-200 text-xs px-2 py-0.5">
+                <Badge variant="secondary" className="ml-auto bg-orange-100 text-orange-700 shadow-sm border border-orange-200/50 text-xs px-2 py-0.5">
                   {item.badge}
                 </Badge>
               )}

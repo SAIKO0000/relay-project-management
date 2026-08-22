@@ -1,70 +1,71 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = 'https://qvoockauodrptvyqqqbe.supabase.co'
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2b29ja2F1b2RycHR2eXFxcWJlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI1NTc4NzUsImV4cCI6MjA2ODEzMzg3NX0.GDOQ0x87OtbXC9_Bla0G1BW1yc5Tzi7LAhHRAdeYah4'
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error(
+    'Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY before running this manual test',
+  )
+}
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 async function testEmailConfirmation() {
-  console.log('🔍 Testing Supabase Email Confirmation Setup...\n')
-  
-  // Test 1: Check if we can connect to Supabase
+  console.log('Testing Supabase email confirmation setup...\n')
+
   try {
-    const { data: { session } } = await supabase.auth.getSession()
-    console.log('✅ Supabase connection: OK')
+    await supabase.auth.getSession()
+    console.log('Supabase connection: OK')
   } catch (error) {
-    console.log('❌ Supabase connection failed:', error.message)
+    console.log('Supabase connection failed:', error.message)
     return
   }
 
-  // Test 2: Check current auth settings (this will show public settings)
   try {
     const { data: settings } = await supabase.auth.getSettings()
-    console.log('✅ Auth settings accessible')
+    console.log('Auth settings accessible')
     console.log('Settings:', JSON.stringify(settings, null, 2))
   } catch (error) {
-    console.log('⚠️ Could not fetch auth settings (normal for client-side):', error.message)
+    console.log('Could not fetch auth settings (normal for a client):', error.message)
   }
 
-  // Test 3: Simulate signup with test email
-  console.log('\n🧪 Testing signup process with test email...')
-  
+  console.log('\nTesting signup with a disposable example address...')
+
   const testEmail = `test+${Date.now()}@example.com`
   const testPassword = 'TestPassword123!'
-  
+
   try {
     const { data, error } = await supabase.auth.signUp({
       email: testEmail,
       password: testPassword,
       options: {
-        emailRedirectTo: 'https://gyg-track-x4ccoazzn-josh01616s-projects.vercel.app/auth/callback'
-      }
+        emailRedirectTo: `${appUrl}/auth/confirm`,
+      },
     })
-    
+
     if (error) {
-      console.log('❌ Signup error:', error.message)
+      console.log('Signup error:', error.message)
       console.log('Error details:', JSON.stringify(error, null, 2))
-    } else {
-      console.log('✅ Signup successful!')
-      console.log('User ID:', data.user?.id)
-      console.log('Email confirmed:', data.user?.email_confirmed_at ? 'Yes' : 'No')
-      console.log('Confirmation sent:', data.user?.confirmation_sent_at ? 'Yes' : 'No')
-      
-      if (!data.user?.email_confirmed_at) {
-        console.log('📧 Email confirmation required - check if email was sent')
-      }
+      return
     }
+
+    console.log('Signup request successful')
+    console.log('User ID:', data.user?.id)
+    console.log('Email confirmed:', data.user?.email_confirmed_at ? 'Yes' : 'No')
+    console.log('Confirmation sent:', data.user?.confirmation_sent_at ? 'Yes' : 'No')
   } catch (error) {
-    console.log('❌ Signup failed:', error.message)
+    console.log('Signup failed:', error.message)
   }
 
-  console.log('\n📋 Checklist for email confirmation:')
+  console.log('\nEmail confirmation checklist:')
   console.log('1. Go to Supabase Dashboard > Authentication > Settings')
-  console.log('2. Check "Enable email confirmations" is ON')
-  console.log('3. Set Site URL to: https://gyg-track-x4ccoazzn-josh01616s-projects.vercel.app')
-  console.log('4. Add redirect URLs for production and localhost')
-  console.log('5. Check Email Templates are configured')
-  console.log('6. Verify SMTP settings if using custom email provider')
+  console.log('2. Check that email confirmation is enabled')
+  console.log(`3. Set Site URL to: ${appUrl}`)
+  console.log('4. Add only the required production and localhost redirect URLs')
+  console.log('5. Check that email templates are configured')
+  console.log('6. Verify SMTP settings if using a custom email provider')
 }
 
 testEmailConfirmation().catch(console.error)

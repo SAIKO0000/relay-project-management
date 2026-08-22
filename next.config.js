@@ -1,10 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Configure allowed image domains
   images: {
-    domains: [
-      'qdagzcivuddbztsybxfk.supabase.co', // Portfolio Supabase storage domain
-    ],
     remotePatterns: [
       {
         protocol: 'https',
@@ -13,22 +9,16 @@ const nextConfig = {
       },
     ],
   },
-  // Disable ESLint during builds to prevent build failures from linting errors
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   // Disable TypeScript checking during builds to prevent build failures
   typescript: {
     ignoreBuildErrors: true,
   },
-  // Enable experimental features
-  experimental: {
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
+  // Configure Turbopack's SVG loader.
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
       },
     },
   },

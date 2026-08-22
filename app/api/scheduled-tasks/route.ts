@@ -1,11 +1,5 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-// Create Supabase client for API routes
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 interface TaskDeadline {
   id: string;
@@ -18,7 +12,23 @@ interface TaskDeadline {
   daysRemaining: number;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const cronSecret = process.env.CRON_SECRET
+  if (!cronSecret || request.headers.get('authorization') !== `Bearer ${cronSecret}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const supabaseUrl = process.env.SUPABASE_URL
+  const supabasePublishableKey = process.env.SUPABASE_PUBLISHABLE_KEY
+  if (!supabaseUrl || !supabasePublishableKey) {
+    return NextResponse.json({ error: 'Scheduled tasks are not configured' }, { status: 503 })
+  }
+
+  // This endpoint only reads data and deliberately never receives a service-role key.
+  const supabase = createClient(supabaseUrl, supabasePublishableKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
+
   try {
     console.log('📅 [API] Checking scheduled tasks for notifications...');
     

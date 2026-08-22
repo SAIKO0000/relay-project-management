@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { requestNotificationPermission, onMessageListener } from '@/lib/firebase';
 import { FCMDebugger } from '@/lib/fcm-debugger';
+import { isDemoMode } from '@/lib/demo/config';
 
 interface FCMHook {
   token: string | null;
@@ -19,6 +20,11 @@ export const useFCM = (): FCMHook => {
   useEffect(() => {
     // Only run on client side
     if (typeof window === 'undefined') return;
+    if (isDemoMode) {
+      setIsSupported(false);
+      setNotificationPermission('default');
+      return;
+    }
 
     // Check browser support first
     const browserSupported = FCMDebugger.checkBrowserSupport();
@@ -47,6 +53,7 @@ export const useFCM = (): FCMHook => {
   }, []);
 
   const requestPermission = async () => {
+    if (isDemoMode) return;
     if (!isSupported) {
       console.log('❌ FCM not supported in this browser');
       return;

@@ -7,9 +7,10 @@ export const createSmartInvalidation = (queryClient: QueryClient) => ({
   
   // Instead of invalidating all projects, update cache directly
   onProjectCreate: (newProject: Project) => {
-    // Optimistic update to projects list
+    // Upsert so the mutation response and realtime event cannot duplicate a row.
     queryClient.setQueryData(queryKeys.projects(), (old: Project[] = []) => {
-      return [newProject, ...old]
+      const withoutExisting = old.filter(project => project.id !== newProject.id)
+      return [newProject, ...withoutExisting]
     })
     
     // Only invalidate dashboard stats, not entire dashboard
@@ -49,14 +50,14 @@ export const createSmartInvalidation = (queryClient: QueryClient) => ({
   },
 
   onTaskCreate: (newTask: Task) => {
-    // Add to tasks cache
+    // Upsert so the mutation response and realtime event cannot duplicate a row.
     queryClient.setQueryData(queryKeys.tasks(), (old: Task[] = []) => {
-      return [newTask, ...old]
+      return [newTask, ...old.filter(task => task.id !== newTask.id)]
     })
     
     // Add to project-specific tasks cache
     queryClient.setQueryData(queryKeys.tasksByProject(newTask.project_id), (old: Task[] = []) => {
-      return [newTask, ...old]
+      return [newTask, ...old.filter(task => task.id !== newTask.id)]
     })
     
     // Only invalidate dashboard stats for progress calculation
@@ -98,7 +99,9 @@ export const createSmartInvalidation = (queryClient: QueryClient) => ({
   // For personnel (rarely changes - long cache times)
   onPersonnelUpdate: (updatedPersonnel: Personnel) => {
     queryClient.setQueryData(queryKeys.personnel(), (old: Personnel[] = []) => {
-      return old.map(p => p.id === updatedPersonnel.id ? updatedPersonnel : p)
+      const existingIndex = old.findIndex(person => person.id === updatedPersonnel.id)
+      if (existingIndex === -1) return [updatedPersonnel, ...old]
+      return old.map(person => person.id === updatedPersonnel.id ? updatedPersonnel : person)
     })
     // No other invalidation needed
   }

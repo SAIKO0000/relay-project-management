@@ -10,12 +10,10 @@ import { Calendar } from "@/components/calendar"
 import { TeamRefactored } from "@/components/team"
 import { ReportsRefactored } from "@/components/reports/ReportsRefactored"
 import { NotificationsRefactored } from "@/components/notifications/NotificationsRefactored"
-import { DeadlineNotificationPopup } from "@/components/deadline-notification-popup"
 import { useAuth } from "@/lib/auth"
-import { useAutoNotifications } from "@/lib/hooks/useAutoNotifications"
-import { useNotificationManager } from "@/lib/hooks/useNotificationManager"
 import { useDynamicTitle } from "@/lib/hooks/useDynamicTitle"
 import { ErrorBoundary } from "@/components/ErrorBoundary"
+import { DemoModeBanner } from "@/components/demo-mode-banner"
 
 export default function Home() {
   // Initialize activeTab with default value, then load from localStorage in useEffect
@@ -32,37 +30,8 @@ export default function Home() {
   const { user, loading } = useAuth()
   const router = useRouter()
 
-  // Auto-trigger notifications when user logs in
-  useAutoNotifications()
-
   // Update page title dynamically
   useDynamicTitle(activeTab)
-
-  // Manage notification popup state
-  const {
-    showPopup,
-    upcomingTasks,
-    dismissPopup,
-    handleTaskClick,
-    isMobileCompatible
-  } = useNotificationManager()
-
-  // Listen for task navigation events from notifications
-  useEffect(() => {
-    const handleNotificationTaskClick = (event: CustomEvent) => {
-      const { taskId } = event.detail;
-      setActiveTab("gantt");
-      localStorage.setItem('activeTab', "gantt");
-      // You could set selectedProjectId based on the task if needed
-      console.log('Navigating to task from notification:', taskId);
-    };
-
-    window.addEventListener('notification-task-click', handleNotificationTaskClick as EventListener);
-    
-    return () => {
-      window.removeEventListener('notification-task-click', handleNotificationTaskClick as EventListener);
-    };
-  }, []);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -126,35 +95,19 @@ export default function Home() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <SidebarRefactored activeTab={activeTab} onTabChangeAction={handleTabChange} />
-      <main className="flex-1 overflow-hidden">
-        <div className="h-full overflow-y-auto pt-20 lg:pt-0">
-          <ErrorBoundary>
-            {renderContent()}
-          </ErrorBoundary>
-        </div>
-      </main>
+    <div className="flex h-screen flex-col bg-gray-50">
+      <DemoModeBanner />
+      <div className="flex min-h-0 flex-1">
+        <SidebarRefactored activeTab={activeTab} onTabChangeAction={handleTabChange} />
+        <main className="flex-1 overflow-hidden">
+          <div className="h-full overflow-y-auto pt-20 lg:pt-0">
+            <ErrorBoundary>
+              {renderContent()}
+            </ErrorBoundary>
+          </div>
+        </main>
+      </div>
       
-      {/* Deadline Notification Popup */}
-      <DeadlineNotificationPopup
-        tasks={upcomingTasks}
-        isVisible={showPopup}
-        onClose={dismissPopup}
-        onTaskClick={handleTaskClick}
-        onViewAllClick={() => {
-          dismissPopup();
-          setActiveTab("gantt");
-          localStorage.setItem('activeTab', "gantt");
-        }}
-      />
-      
-      {/* Mobile compatibility indicator */}
-      {!isMobileCompatible && (
-        <div className="fixed bottom-4 left-4 p-2 bg-yellow-100 border border-yellow-300 rounded text-xs text-yellow-800 max-w-xs">
-          ⚠️ Notifications may not work on this device/browser
-        </div>
-      )}
     </div>
   )
 }

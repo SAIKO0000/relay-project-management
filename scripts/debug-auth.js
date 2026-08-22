@@ -1,8 +1,12 @@
 // Debug script to check Supabase auth configuration
 const { createClient } = require('@supabase/supabase-js')
 
-const supabaseUrl = 'https://qvoockauodrptvyqqqbe.supabase.co'
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2b29ja2F1b2RycHR2eXFxcWJlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI1NTc4NzUsImV4cCI6MjA2ODEzMzg3NX0.GDOQ0x87OtbXC9_Bla0G1BW1yc5Tzi7LAhHRAdeYah4'
+const supabaseUrl = process.env.SUPABASE_URL
+const supabaseAnonKey = process.env.SUPABASE_PUBLISHABLE_KEY
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Set SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY before running this script')
+}
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey)
 

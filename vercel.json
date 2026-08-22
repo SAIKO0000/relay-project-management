@@ -6,10 +6,10 @@
       "NODE_OPTIONS": "--max-old-space-size=4096"
     }
   },
-  "rewrites": [
+  "crons": [
     {
-      "source": "/((?!api/).*)",
-      "destination": "/"
+      "path": "/api/keepalive",
+      "schedule": "17 8 * * *"
     }
   ],
   "headers": [

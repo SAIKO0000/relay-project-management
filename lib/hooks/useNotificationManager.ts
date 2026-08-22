@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useDeadlineNotifications } from './useDeadlineNotifications';
 import { MobileNotificationService } from '@/lib/mobile-notification-service';
+import { isDemoMode } from '@/lib/demo/config';
 
 interface TaskDeadline {
   id: string;
@@ -34,13 +35,16 @@ interface UseNotificationManager {
 
 export const useNotificationManager = (): UseNotificationManager => {
   const [showPopup, setShowPopup] = useState(false);
-  const [isMobileCompatible, setIsMobileCompatible] = useState(false);
+  const [isMobileCompatible, setIsMobileCompatible] = useState(isDemoMode);
   const [lastDismissTime, setLastDismissTime] = useState<number>(0);
   
   const { upcomingTasks, isLoading, checkDeadlines } = useDeadlineNotifications();
 
   // Check mobile compatibility
   useEffect(() => {
+    if (isDemoMode) {
+      return;
+    }
     const checkMobileCompatibility = () => {
       if (typeof window === 'undefined') return false;
       
@@ -75,6 +79,10 @@ export const useNotificationManager = (): UseNotificationManager => {
 
   // Show popup when there are new tasks (with throttling)
   useEffect(() => {
+    // The public demo should open as a calm product walkthrough. Deadline
+    // alerts remain available from the Notifications screen when requested.
+    if (isDemoMode) return;
+
     if (upcomingTasks.length > 0) {
       const now = Date.now();
       const timeSinceLastDismiss = now - lastDismissTime;
@@ -122,6 +130,7 @@ export const useNotificationManager = (): UseNotificationManager => {
   }, [dismissPopup]);
 
   const requestMobilePermission = useCallback(async (): Promise<boolean> => {
+    if (isDemoMode) return true;
     try {
       const mobileService = MobileNotificationService.getInstance();
       const granted = await mobileService.requestPermission();

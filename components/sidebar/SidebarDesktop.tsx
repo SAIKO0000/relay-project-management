@@ -27,7 +27,7 @@ export function SidebarDesktop({
   onLogoutAction
 }: SidebarDesktopProps) {
   return (
-    <div className={`hidden lg:flex bg-gradient-to-b from-white via-gray-50/30 to-white border-r border-gray-200/50 backdrop-blur-sm transition-all duration-300 ease-in-out flex-col h-full shadow-sm ${collapsed ? "w-20" : "w-72"}`}>
+    <div className={`hidden lg:flex bg-gradient-to-b from-white via-gray-50/30 to-white border-r border-gray-200/50 flex-col h-full shadow-sm ${collapsed ? "w-20" : "w-72"}`}>
       {/* Header */}
       <SidebarDesktopHeader 
         collapsed={collapsed}

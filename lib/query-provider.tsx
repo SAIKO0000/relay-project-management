@@ -2,10 +2,19 @@
 
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { getQueryClient } from './query-client-optimized'
 import { createOptimizedQueryClient } from './hooks/useOptimizedQueryClient'
 import { runtimeConfig } from './optimization-flags'
+import { isDemoMode } from './demo/config'
+import { queryKeys } from './supabase-query'
+
+type DemoChange = {
+  table: string
+  eventType: 'INSERT' | 'UPDATE' | 'DELETE' | 'RESET'
+  new: Record<string, unknown> | null
+  old: Record<string, unknown> | null
+}
 
 export function QueryProvider({ children }: { children: React.ReactNode }) {
   // Use optimized client if enabled, fallback to original
@@ -19,10 +28,55 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
     }
   })
 
+  useEffect(() => {
+    if (!isDemoMode) return
+
+    const handleDemoChange = (event: Event) => {
+      const change = (event as CustomEvent<DemoChange>).detail
+      if (!change) return
+
+      if (change.eventType === 'RESET' || change.table === '*') {
+        void queryClient.invalidateQueries()
+        return
+      }
+
+      if (change.table === 'projects') {
+        const changedProject = change.new ?? change.old
+        const changedId = String(changedProject?.id ?? '')
+
+        queryClient.setQueryData<Record<string, unknown>[]>(queryKeys.projects(), (current = []) => {
+          if (change.eventType === 'DELETE') {
+            return current.filter(project => String(project.id) !== changedId)
+          }
+
+          if (!change.new) return current
+          return [
+            change.new,
+            ...current.filter(project => String(project.id) !== changedId),
+          ]
+        })
+      }
+
+      // Active queries refetch immediately from browser-local storage. This is
+      // also the cross-tab fallback for tables without an optimistic updater.
+      void queryClient.invalidateQueries({
+        predicate: query => {
+          const parts = query.queryKey.map(String)
+          return parts.includes(change.table) || parts.includes('dashboard')
+        },
+      })
+    }
+
+    window.addEventListener('projtrack-demo-change', handleDemoChange)
+    return () => window.removeEventListener('projtrack-demo-change', handleDemoChange)
+  }, [queryClient])
+
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      <ReactQueryDevtools initialIsOpen={false} />
+      {process.env.NODE_ENV === 'development' ? (
+        <ReactQueryDevtools initialIsOpen={false} />
+      ) : null}
     </QueryClientProvider>
   )
 }

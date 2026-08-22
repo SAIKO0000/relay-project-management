@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { MapPin, Loader2 } from "lucide-react"
+import { isDemoMode } from "@/lib/demo/config"
 
 interface LocationSuggestion {
   properties: {
@@ -27,8 +28,6 @@ interface LocationAutocompleteProps {
   className?: string
 }
 
-const GEOAPIFY_API_KEY = "dfa060e748234ad18917ceba6bf3cfb3"
-
 export function LocationAutocomplete({ 
   value, 
   onChangeAction, 
@@ -44,6 +43,13 @@ export function LocationAutocomplete({
   const inputRef = useRef<HTMLInputElement>(null)
 
   const searchLocations = useCallback(async (query: string) => {
+    const geoapifyKey = process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY
+    if (isDemoMode || !geoapifyKey) {
+      setSuggestions([])
+      setShowDropdown(false)
+      return
+    }
+
     if (query.length < 3) {
       setSuggestions([])
       setShowDropdown(false)
@@ -53,7 +59,7 @@ export function LocationAutocomplete({
     setIsLoading(true)
     try {
       const response = await fetch(
-        `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(query)}&apiKey=${GEOAPIFY_API_KEY}&limit=5&filter=countrycode:ph`
+        `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(query)}&apiKey=${geoapifyKey}&limit=5&filter=countrycode:ph`
       )
       
       if (!response.ok) {

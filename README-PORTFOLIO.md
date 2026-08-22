@@ -6,7 +6,9 @@ A comprehensive project management dashboard built with modern web technologies,
 
 ## 🎯 **Live Demo**
 
-🌐 **[View Live Demo](https://your-demo-url.vercel.app)** *(Deploy link will be added after deployment)*
+🌐 **[View Live Demo](https://projtrack-portfolio-demo.vercel.app)**
+
+See [PRIVATE_BETA_AND_BACKUP_PLAN.md](./PRIVATE_BETA_AND_BACKUP_PLAN.md) for the planned invite-only deployment, data-isolation, security, and backup model.
 
 ---
 
@@ -14,7 +16,7 @@ A comprehensive project management dashboard built with modern web technologies,
 
 This is a **portfolio demonstration** of a sophisticated engineering management system designed for construction and infrastructure projects. The application demonstrates my expertise in:
 
-- **Full-Stack Development** with Next.js 15 and TypeScript
+- **Full-Stack Development** with Next.js 16 and TypeScript
 - **Real-time Database Management** with Supabase/PostgreSQL
 - **Modern UI/UX Design** with Tailwind CSS and shadcn/ui
 - **Advanced Features** including Gantt charts, file management, and notifications
@@ -53,7 +55,7 @@ This application contains **fictional demo data** for portfolio purposes. All pr
 ## 🛠 **Technology Stack**
 
 ### **Frontend**
-- **Next.js 15** (App Router, React 19)
+- **Next.js 16** (App Router, React 19)
 - **TypeScript** for type safety
 - **Tailwind CSS** for styling
 - **shadcn/ui** component library
@@ -112,9 +114,9 @@ This application contains **fictional demo data** for portfolio purposes. All pr
 ## 🚦 **Getting Started**
 
 ### **Prerequisites**
-- Node.js 18+ 
+- Node.js 22
 - npm or yarn
-- Supabase account
+- A Supabase account only for private live-backend development
 
 ### **Environment Setup**
 ```bash
@@ -127,18 +129,21 @@ npm install
 
 # Set up environment variables
 cp .env.example .env.local
-# Edit .env.local with your Supabase credentials
+# Browser-local Demo Mode works without cloud credentials
 ```
 
-### **Environment Variables**
+### **Private Live-backend Variables (Optional)**
 ```env
+NEXT_PUBLIC_DEMO_MODE=false
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
+Never expose or configure a Supabase service-role key in a public portfolio deployment.
+
 ### **Database Setup**
+Only required for private live-backend mode:
 1. Create a new Supabase project
 2. Run the schema script: `scripts/export-database-schema.sql`
 3. Seed with demo data: `scripts/seed-demo-data.sql`

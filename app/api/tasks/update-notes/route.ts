@@ -3,6 +3,12 @@ import { supabase } from '@/lib/supabase'
 
 export async function PATCH(request: NextRequest) {
   try {
+    const token = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '')
+    const { data: { user } } = token ? await supabase.auth.getUser(token) : { data: { user: null } }
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { taskId, notes } = await request.json()
 
     if (!taskId) {

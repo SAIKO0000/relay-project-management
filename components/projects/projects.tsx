@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useSupabaseQuery } from "@/lib/hooks/useSupabaseQuery"
-import { useDeleteProject, useUpdateProject } from "@/lib/hooks/useProjectsOptimized"
+import { useDeleteProject, useProjectsQuery, useUpdateProject } from "@/lib/hooks/useProjectsOptimized"
 import { useReportsOptimized, useReportOperations } from "@/lib/hooks/useReportsOptimized"
 import { ProjectFormModal } from "@/components/project-form-modal"
 import { ReportUploadModal } from "@/components/report-upload-modal"
@@ -49,11 +49,11 @@ import { type ProjectsProps, type ProjectModalState, type ProjectFilters } from 
 export function Projects({ onProjectSelect }: ProjectsProps) {
   // Use centralized TanStack Query hooks
   const supabaseQuery = useSupabaseQuery()
-  const { 
+  const {
     data: projectsData = [], 
     isLoading: loading,
     refetch: refetchProjects 
-  } = supabaseQuery.useProjectsQuery()
+  } = useProjectsQuery()
   const { data: tasks = [], isLoading: tasksLoading } = supabaseQuery.useTasksQuery()
   
   // Type guard to ensure projects is an array of Project objects with memoization
@@ -189,12 +189,9 @@ export function Projects({ onProjectSelect }: ProjectsProps) {
 
   // Event handlers
   const handleProjectCreated = useCallback(() => {
-    // IMMEDIATE UI UPDATE - Force refresh after project creation
-    setTimeout(() => {
-      refetchProjects()
-      forceUIUpdate()
-    }, 100) // Small delay to prevent race conditions
-  }, [refetchProjects, forceUIUpdate])
+    // The mutation and realtime subscription update the shared cache directly.
+    // No delayed refetch is needed, so the new card appears in the same frame.
+  }, [])
 
   const handleDeleteProject = useCallback(async (projectId: string) => {
     const project = projects.find(p => p.id === projectId)

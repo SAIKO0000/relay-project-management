@@ -6,6 +6,10 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const token = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '')
+    const { data: { user } } = token ? await supabase.auth.getUser(token) : { data: { user: null } }
+    if (!user) return new NextResponse('Unauthorized', { status: 401 })
+
     const params = await context.params
     // Get the report details
     const { data: report, error: reportError } = await supabase

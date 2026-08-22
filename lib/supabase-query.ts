@@ -1,28 +1,7 @@
-import { createClient } from '@supabase/supabase-js'
 import { QueryClient } from '@tanstack/react-query'
-import type { Database } from './supabase.types'
+import { supabase } from './supabase'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-
-// Enhanced Supabase client with optimized settings
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true
-  },
-  realtime: {
-    params: {
-      eventsPerSecond: 2, // Limit realtime events to reduce load
-    }
-  },
-  global: {
-    headers: {
-      'x-application-name': 'ProjTrack'
-    }
-  }
-})
+export { supabase }
 
 // Centralized query keys factory - prevents cache key mismatches
 export const queryKeys = {

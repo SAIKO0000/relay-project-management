@@ -129,8 +129,6 @@ export const FCMDebugger = {
     if (token) {
       console.log('🔑 FCM Token received:');
       console.log('   - Length:', token.length);
-      console.log('   - Preview:', token.substring(0, 20) + '...');
-      console.log('   - Full token:', token);
     } else {
       console.log('❌ No FCM token available');
     }

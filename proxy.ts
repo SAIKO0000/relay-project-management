@@ -1,10 +1,17 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   // Public routes that don't require authentication
   const publicRoutes = ['/auth/login', '/auth/signup']
   const { pathname } = req.nextUrl
+
+  // The public portfolio build has no real accounts or public diagnostic UI.
+  if (process.env.NEXT_PUBLIC_DEMO_MODE !== 'false') {
+    if (pathname.startsWith('/auth') || pathname.startsWith('/debug') || pathname.startsWith('/test')) {
+      return NextResponse.redirect(new URL('/', req.url))
+    }
+  }
 
   // Allow access to public routes and static files
   if (publicRoutes.includes(pathname) || 

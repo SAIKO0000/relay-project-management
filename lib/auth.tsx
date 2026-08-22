@@ -1,16 +1,15 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback, useMemo } from 'react'
-import { createClient } from '@supabase/supabase-js'
 import { User, Session } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
 import { clearAuthStorage, handleAuthError } from './auth-utils'
+import { supabase } from './supabase'
+import { isDemoMode } from './demo/config'
+import { resetDemoData } from './demo/supabase-client'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export { supabase }
 
 interface AuthContextType {
   user: User | null
@@ -112,7 +111,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event: string, session: Session | null) => {
       console.log('Auth state change:', event, session?.user?.email)
       
       if (!isMounted) return
@@ -190,6 +189,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, [router])
 
   const signUp = useCallback(async (email: string, password: string, userData: UserData) => {
+    if (isDemoMode) {
+      return { success: false, error: 'Account creation is disabled in browser-local Demo Mode.' }
+    }
+
     try {
       setLoading(true)
       
@@ -260,6 +263,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, [router])
 
   const signOut = useCallback(async () => {
+    if (isDemoMode) {
+      resetDemoData()
+      toast.success('Demo data reset successfully')
+      router.push('/')
+      return
+    }
+
     try {
       setLoading(true)
       
@@ -286,7 +296,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [router])
 
   const value = useMemo(() => ({
     user,

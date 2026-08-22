@@ -1,7 +1,12 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const adminSecret = process.env.ADMIN_API_SECRET
+  if (!adminSecret || request.headers.get('authorization') !== `Bearer ${adminSecret}`) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  }
+
   try {
     // Check if the report_reviewers table exists and is accessible
     const { error } = await supabase

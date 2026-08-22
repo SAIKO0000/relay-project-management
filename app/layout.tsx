@@ -34,6 +34,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
+        data-performance-mode="true"
         className={`${geist.variable} ${geistMono.variable} antialiased`}
       >
         <QueryProvider>
