@@ -95,19 +95,16 @@ export default function Home() {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-gray-50">
-      <DemoModeBanner />
-      <div className="flex min-h-0 flex-1">
-        <SidebarRefactored activeTab={activeTab} onTabChangeAction={handleTabChange} />
-        <main className="flex-1 overflow-hidden">
-          <div className="h-full overflow-y-auto pt-20 lg:pt-0">
-            <ErrorBoundary>
-              {renderContent()}
-            </ErrorBoundary>
-          </div>
-        </main>
-      </div>
-      
+    <div className="flex h-dvh min-h-0 overflow-hidden bg-gray-50">
+      <SidebarRefactored activeTab={activeTab} onTabChangeAction={handleTabChange} />
+      <main className="min-w-0 flex-1 overflow-hidden">
+        <div className="h-full overflow-x-hidden overflow-y-auto pt-14 sm:pt-16 lg:pt-0">
+          <DemoModeBanner />
+          <ErrorBoundary>
+            {renderContent()}
+          </ErrorBoundary>
+        </div>
+      </main>
     </div>
   )
 }

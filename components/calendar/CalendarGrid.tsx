@@ -24,12 +24,12 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
   onGoToToday
 }) => {
   return (
-    <Card className="lg:col-span-3 order-1 lg:order-1 bg-white/95 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200/50" style={{ zIndex: 1 }}>
-      <CardHeader>
+    <Card className="order-1 gap-3 border border-gray-200/50 bg-white/95 py-3 shadow-sm sm:gap-6 sm:py-6 sm:shadow-lg lg:order-1 lg:col-span-3" style={{ zIndex: 1 }}>
+      <CardHeader className="px-2 sm:px-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center justify-center sm:justify-start space-x-2 sm:space-x-4">
+          <div className="flex w-full min-w-0 items-center gap-1 sm:w-auto sm:justify-start sm:space-x-4">
             {/* Navigation arrows and dropdowns aligned together */}
-            <div className="flex items-center space-x-1 sm:space-x-2">
+            <div className="grid min-w-0 flex-1 grid-cols-[2rem_minmax(0,1fr)_4.25rem_2rem] items-center gap-1 sm:flex sm:flex-none sm:space-x-2">
               <Button
                 variant="outline"
                 size="sm"
@@ -39,7 +39,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
                 <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
               <Select value={selectedDate.getMonth().toString()} onValueChange={onMonthChange}>
-                <SelectTrigger className="w-[100px] sm:w-[130px] h-8 sm:h-10 text-xs sm:text-sm rounded-md sm:rounded-lg">
+                <SelectTrigger className="h-8 w-full min-w-0 rounded-md px-2 text-xs sm:h-10 sm:w-[130px] sm:rounded-lg sm:px-3 sm:text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -51,7 +51,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
                 </SelectContent>
               </Select>
               <Select value={selectedDate.getFullYear().toString()} onValueChange={onYearChange}>
-                <SelectTrigger className="w-[70px] sm:w-[100px] h-8 sm:h-10 text-xs sm:text-sm rounded-md sm:rounded-lg">
+                <SelectTrigger className="h-8 w-full rounded-md px-2 text-xs sm:h-10 sm:w-[100px] sm:rounded-lg sm:px-3 sm:text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -75,14 +75,14 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
               variant="outline"
               size="default"
               onClick={onGoToToday}
-              className="text-orange-600 border-orange-200 hover:bg-orange-50 h-8 w-16 sm:h-10 sm:w-20 md:h-12 md:w-auto px-2 sm:px-4 md:px-6 text-xs sm:text-sm rounded-md sm:rounded-lg"
+              className="h-8 w-14 shrink-0 rounded-md border-orange-200 px-1 text-xs text-orange-600 hover:bg-orange-50 sm:h-10 sm:w-20 sm:rounded-lg sm:px-4 sm:text-sm md:h-12 md:w-auto md:px-6"
             >
               Today
             </Button>
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-2 sm:px-6">
         {/* Mobile-responsive day headers */}
         <div className="grid grid-cols-7 gap-1 sm:gap-1 mb-2 sm:mb-4">
           {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
@@ -107,8 +107,8 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
                 <div
                   key={day ? day.toISOString() : `empty-${index}`}
                   className={`
-                    aspect-square min-h-[70px] h-[70px] max-h-[70px] sm:min-h-[90px] sm:h-[90px] sm:max-h-[90px] md:min-h-[120px] md:h-auto md:max-h-none w-full p-1 sm:p-1.5 md:p-2 border border-gray-200 rounded-md sm:rounded-lg cursor-pointer transition-all duration-200
-                    hover:shadow-lg hover:-translate-y-1 hover:border-gray-300 touch-manipulation flex flex-col
+                    aspect-square min-h-0 min-w-0 h-auto w-full p-1 sm:min-h-[90px] sm:h-[90px] sm:max-h-[90px] sm:p-1.5 md:aspect-auto md:min-h-[120px] md:h-auto md:max-h-none md:p-2 border border-gray-200 rounded-md sm:rounded-lg cursor-pointer transition-all duration-200
+                    hover:border-gray-300 sm:hover:-translate-y-1 sm:hover:shadow-lg touch-manipulation flex flex-col
                     ${isToday ? 'bg-orange-50 ring-1 sm:ring-2 ring-orange-200 shadow-md' : 'bg-white hover:bg-gray-50'}
                     ${!isCurrentMonth ? 'bg-gray-50 text-gray-400 hover:bg-gray-100' : ''}
                   `}

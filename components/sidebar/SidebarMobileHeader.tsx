@@ -18,10 +18,10 @@ export function SidebarMobileHeader({
   if (!isMobile) return null
 
   return (
-    <div className="sidebar-mobile-header lg:hidden fixed top-0 left-0 right-0 bg-white p-3 sm:p-4 z-[90] shadow-sm border-b border-gray-100/50">
-      <div className="flex items-center justify-between">
+    <div className="sidebar-mobile-header fixed inset-x-0 top-0 z-[90] h-14 border-b border-gray-100 bg-white/95 px-3 shadow-sm lg:hidden sm:h-16 sm:px-4">
+      <div className="flex h-full items-center justify-between">
         <div className="flex items-center space-x-2 sm:space-x-3">
-          <div className="w-10 h-8 sm:w-12 sm:h-10 flex items-center justify-center rounded-lg bg-white shadow-sm border border-gray-100/50">
+          <div className="flex h-8 w-10 items-center justify-center rounded-lg border border-gray-100 bg-white shadow-sm sm:h-10 sm:w-12">
             <Image 
               src="/logo.svg" 
               alt="GYG Power Systems" 
@@ -31,8 +31,8 @@ export function SidebarMobileHeader({
               priority
             />
           </div>
-          <div>
-            <h1 className="text-sm sm:text-base font-bold text-gray-900 tracking-tight">GYG Power Systems</h1>
+          <div className="min-w-0">
+            <h1 className="truncate text-sm font-bold tracking-tight text-gray-900 sm:text-base">GYG Power Systems</h1>
             <p className="text-xs text-gray-600 font-medium hidden sm:block">Electrical Engineering Solutions</p>
           </div>
         </div>
@@ -40,7 +40,7 @@ export function SidebarMobileHeader({
           variant="ghost" 
           size="sm" 
           onClick={onToggleMobileMenuAction} 
-          className="p-2 sm:p-3 hover:bg-gray-50 rounded-lg border border-transparent hover:border-gray-200 shadow-sm transition-colors duration-150 motion-reduce:transition-none"
+          className="h-9 w-9 shrink-0 rounded-lg border border-gray-200 p-0 shadow-sm transition-colors duration-150 hover:bg-gray-50 motion-reduce:transition-none sm:h-10 sm:w-10"
         >
           {mobileMenuOpen ? 
             <X className="h-4 w-4 sm:h-5 sm:w-5 text-gray-700" /> : 

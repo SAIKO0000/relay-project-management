@@ -11,25 +11,25 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   return (
     <>
       {/* Modern Header with Glassmorphism */}
-      <div className="bg-white/95 backdrop-blur-sm p-4 sm:p-5 lg:p-7 rounded-xl shadow-lg border border-gray-200/50">
+      <div className="rounded-lg border border-gray-200/50 bg-white/95 p-3 shadow-sm sm:rounded-xl sm:p-5 sm:shadow-lg lg:p-7">
         {/* Mobile Layout: Title and description centered */}
-        <div className="lg:hidden text-center mb-4">
-          <div className="flex items-center gap-3 justify-center mb-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg">
-              <CalendarIcon className="h-5 w-5" />
+        <div className="lg:hidden">
+          <div className="mb-1 flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-sm">
+              <CalendarIcon className="h-4 w-4" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">Calendar</h1>
+            <h1 className="text-xl font-bold text-gray-900">Calendar</h1>
           </div>
-          <p className="text-base text-gray-600">Schedule and track project activities</p>
-          <div className="flex justify-center mt-3">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-sm text-gray-600">Schedule and track project activities</p>
             <Button
               variant="outline"
-              size="default"
+              size="sm"
               onClick={onRefresh}
-              className="flex items-center gap-2 h-10 px-5 py-2 border-gray-300 hover:border-gray-400 hover:shadow-md transition-all duration-200"
+              className="h-7 shrink-0 gap-1 border-gray-300 px-2 text-xs hover:border-gray-400"
             >
-              <RefreshCw className="h-4 w-4" />
-              Refresh
+              <RefreshCw className="h-3.5 w-3.5" />
+              <span className="hidden min-[380px]:inline">Refresh</span>
             </Button>
           </div>
         </div>

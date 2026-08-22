@@ -23,15 +23,15 @@ export const CalendarFilters: React.FC<CalendarFiltersProps> = ({
 }) => {
   return (
     <div 
-      className="bg-white/95 backdrop-blur-sm p-4 sm:p-5 rounded-xl shadow-lg border border-gray-200/50 relative"
+      className="relative rounded-lg border border-gray-200/50 bg-white/95 p-3 shadow-sm sm:rounded-xl sm:p-5 sm:shadow-lg"
       style={{ zIndex: 50 }}
     >
-      <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
         {/* Mobile: Project Filter and New Event Button in same row */}
-        <div className="flex items-center gap-3 lg:hidden">
-          <div className="flex-1">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 lg:hidden sm:gap-3">
+          <div className="min-w-0">
             <Select value={selectedProject} onValueChange={onProjectChange}>
-              <SelectTrigger className="w-full h-10">
+              <SelectTrigger className="h-9 w-full min-w-0 sm:h-10">
                 <SelectValue placeholder="All Projects" />
               </SelectTrigger>
               <SelectContent>
@@ -73,7 +73,7 @@ export const CalendarFilters: React.FC<CalendarFiltersProps> = ({
             onChange={(e) => onSearchChange(e.target.value)}
             onFocus={onSearchFocus}
             onBlur={onSearchBlur}
-            className="pl-10 h-10"
+            className="h-9 pl-9 sm:h-10 sm:pl-10"
           />
           {searchQuery && (
             <Button

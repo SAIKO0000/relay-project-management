@@ -196,9 +196,10 @@ export function EventFormModal({ onEventCreated, selectedDate, trigger, eventToE
       {!isEditing && (
         <DialogTrigger asChild>
           {trigger || (
-            <Button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 h-10 px-5 py-2">
-              <Plus className="h-4 w-4 mr-2" />
-              New Event
+            <Button className="h-9 bg-gradient-to-r from-orange-500 to-orange-600 px-3 text-xs hover:from-orange-600 hover:to-orange-700 sm:h-10 sm:px-5 sm:text-sm">
+              <Plus className="mr-1.5 h-4 w-4 sm:mr-2" />
+              <span className="sm:hidden">Add</span>
+              <span className="hidden sm:inline">New Event</span>
             </Button>
           )}
         </DialogTrigger>

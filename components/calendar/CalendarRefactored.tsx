@@ -554,7 +554,7 @@ export function Calendar() {
   }
 
   return (
-    <div className="p-3 sm:p-5 lg:p-9 space-y-4 sm:space-y-5 lg:space-y-7 overflow-y-auto h-full bg-gradient-to-br from-gray-50 via-white to-gray-100/50">
+    <div className="h-full space-y-3 overflow-y-auto bg-gradient-to-br from-gray-50 via-white to-gray-100/50 p-2 sm:space-y-5 sm:p-5 lg:space-y-7 lg:p-9">
       <CalendarHeader
         selectedDate={selectedDate}
         monthNames={MONTH_NAMES}

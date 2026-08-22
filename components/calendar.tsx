@@ -664,18 +664,18 @@ export function Calendar() {
   }
 
   return (
-    <div className="p-3 sm:p-5 lg:p-9 space-y-4 sm:space-y-5 lg:space-y-7 overflow-y-auto h-full bg-gradient-to-br from-gray-50 via-white to-gray-100/50">
+    <div className="h-full space-y-3 overflow-y-auto bg-gradient-to-br from-gray-50 via-white to-gray-100/50 p-2 sm:space-y-5 sm:p-5 lg:space-y-7 lg:p-9">
       {/* Modern Header with Glassmorphism */}
-      <div className="bg-white/95 backdrop-blur-sm p-4 sm:p-5 lg:p-7 rounded-xl shadow-lg border border-gray-200/50">
+      <div className="rounded-lg border border-gray-200/50 bg-white/95 p-3 shadow-sm sm:rounded-xl sm:p-5 sm:shadow-lg lg:p-7">
         {/* Mobile Layout: Title and description centered */}
-        <div className="lg:hidden text-center mb-4">
-          <div className="flex items-center gap-3 justify-center mb-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg">
-              <CalendarIcon className="h-5 w-5" />
+        <div className="lg:hidden">
+          <div className="mb-1 flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-sm">
+              <CalendarIcon className="h-4 w-4" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">Calendar</h1>
+            <h1 className="text-xl font-bold text-gray-900">Calendar</h1>
           </div>
-          <p className="text-base text-gray-600">Schedule and track project activities</p>
+          <p className="text-sm text-gray-600">Schedule and track project activities</p>
         </div>
         
         {/* Desktop Layout: Enhanced header */}
@@ -699,15 +699,15 @@ export function Calendar() {
 
       {/* Project Filter and Search - Mobile Optimized */}
       <div 
-        className="bg-white/95 backdrop-blur-sm p-4 sm:p-5 rounded-xl shadow-lg border border-gray-200/50 relative"
+        className="relative rounded-lg border border-gray-200/50 bg-white/95 p-3 shadow-sm sm:rounded-xl sm:p-5 sm:shadow-lg"
         style={{ zIndex: 50 }}
       >
-        <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
           {/* Mobile: Project Filter and New Event Button in same row */}
-          <div className="flex items-center gap-3 lg:hidden">
-            <div className="flex-1">
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 lg:hidden sm:gap-3">
+            <div className="min-w-0">
               <Select value={selectedProject} onValueChange={setSelectedProject}>
-                <SelectTrigger className="w-full h-10">
+                <SelectTrigger className="h-9 w-full min-w-0 sm:h-10">
                   <SelectValue placeholder="All Projects" />
                 </SelectTrigger>
                 <SelectContent>
@@ -752,7 +752,7 @@ export function Calendar() {
               }}
               onFocus={() => setShowSearchSuggestions(searchQuery.length >= 2)}
               onBlur={() => setTimeout(() => setShowSearchSuggestions(false), 150)}
-              className="pl-10 h-10"
+              className="h-9 pl-9 sm:h-10 sm:pl-10"
             />
             {searchQuery && (
               <Button
@@ -850,11 +850,11 @@ export function Calendar() {
       </div>      {/* Mobile-responsive calendar layout */}
       <div className="flex flex-col lg:grid lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8" style={{ zIndex: 1 }}>
         {/* Calendar - Full width on mobile, 3/4 on desktop - Shows FIRST on mobile */}
-        <Card className="lg:col-span-3 order-1 lg:order-1 bg-white/95 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200/50" style={{ zIndex: 1 }}>          <CardHeader>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center space-x-2 sm:space-x-4">
+        <Card className="order-1 gap-3 border border-gray-200/50 bg-white/95 py-3 shadow-sm sm:gap-6 sm:py-6 sm:shadow-lg lg:order-1 lg:col-span-3" style={{ zIndex: 1 }}>          <CardHeader className="px-2 sm:px-6">
+            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+              <div className="flex w-full min-w-0 items-center gap-1 sm:w-auto sm:space-x-4">
                 {/* Navigation arrows and dropdowns aligned together */}
-                <div className="flex items-center space-x-1 sm:space-x-2">
+                <div className="grid min-w-0 flex-1 grid-cols-[2rem_minmax(0,1fr)_4.25rem_2rem] items-center gap-1 sm:flex sm:flex-none sm:space-x-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -864,7 +864,7 @@ export function Calendar() {
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
                   <Select value={selectedDate.getMonth().toString()} onValueChange={handleMonthChange}>
-                    <SelectTrigger className="w-[110px] sm:w-[130px] h-8 sm:h-10">
+                    <SelectTrigger className="h-8 w-full min-w-0 px-2 text-xs sm:h-10 sm:w-[130px] sm:px-3 sm:text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -876,7 +876,7 @@ export function Calendar() {
                     </SelectContent>
                   </Select>
                   <Select value={selectedDate.getFullYear().toString()} onValueChange={handleYearChange}>
-                    <SelectTrigger className="w-[80px] sm:w-[100px] h-8 sm:h-10">
+                    <SelectTrigger className="h-8 w-full px-2 text-xs sm:h-10 sm:w-[100px] sm:px-3 sm:text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -900,18 +900,18 @@ export function Calendar() {
                   variant="outline"
                   size="default"
                   onClick={goToToday}
-                  className="text-orange-600 border-orange-200 hover:bg-orange-50 h-12 px-6"
+                  className="h-8 w-14 shrink-0 border-orange-200 px-1 text-xs text-orange-600 hover:bg-orange-50 sm:h-10 sm:w-20 sm:px-4 sm:text-sm md:h-12 md:w-auto md:px-6"
                 >
                   Today
                 </Button>
               </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-2 sm:px-6">
             {/* Mobile-responsive day headers */}
             <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-2 sm:mb-4">
               {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
-                <div key={`day-header-${index}`} className="p-2 sm:p-2 text-center text-sm sm:text-sm font-medium text-gray-500 min-h-[40px] sm:min-h-[auto] flex items-center justify-center">
+                <div key={`day-header-${index}`} className="flex min-h-7 items-center justify-center p-1 text-center text-sm font-medium text-gray-500 sm:min-h-10 sm:p-2">
                   <span className="sm:hidden text-base font-semibold">{day}</span>
                   <span className="hidden sm:inline">
                     {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][index]}
@@ -921,8 +921,8 @@ export function Calendar() {
             </div>
             
             {/* Mobile-responsive calendar grid */}
-            <div className="bg-gray-50 p-2 sm:p-3 rounded-lg mx-0">
-              <div className="grid grid-cols-7 gap-2 sm:gap-1">
+            <div className="mx-0 rounded-lg bg-gray-50 p-1 sm:p-3">
+              <div className="grid grid-cols-7 gap-1 sm:gap-1 md:gap-2">
                 {days.map((day, index) => {
                 const dayEvents = day ? getEventsForDate(day) : []
                 const isToday = day ? isSameDay(day, today) : false
@@ -932,8 +932,8 @@ export function Calendar() {
                   <div
                     key={day ? formatDateToLocal(day) : `empty-${index}`}
                     className={`
-                      min-h-[70px] sm:min-h-[120px] w-full p-2 sm:p-2 border border-gray-200 rounded-md sm:rounded-lg cursor-pointer transition-all duration-200
-                      hover:shadow-lg hover:-translate-y-1 hover:border-gray-300 touch-manipulation
+                      aspect-square min-h-0 min-w-0 w-full p-1 sm:aspect-auto sm:min-h-[120px] sm:p-2 border border-gray-200 rounded-md sm:rounded-lg cursor-pointer transition-all duration-200
+                      hover:border-gray-300 sm:hover:-translate-y-1 sm:hover:shadow-lg touch-manipulation
                       ${isToday ? 'bg-orange-50 ring-1 sm:ring-2 ring-orange-200 shadow-md' : 'bg-white hover:bg-gray-50'}
                       ${!isCurrentMonth ? 'bg-gray-50 text-gray-400 hover:bg-gray-100' : ''}
                     `}
