@@ -7,6 +7,7 @@ import { Upload, File, X, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useProjectOperations } from '@/lib/hooks/useProjectOperations'
 import { toast } from 'react-hot-toast'
+import { uploadAccept, uploadPolicies, validateUploadFile } from '@/lib/upload-policy'
 
 interface ProjectFileUploadProps {
   projectId: string
@@ -16,16 +17,12 @@ interface ProjectFileUploadProps {
   className?: string
 }
 
-const SUPPORTED_FILE_TYPES = [
-  '.pdf', '.doc', '.docx', '.xls', '.xlsx', 
-  '.ppt', '.pptx', '.txt', '.jpg', '.jpeg', 
-  '.png', '.gif', '.zip', '.rar'
-]
+const SUPPORTED_FILE_TYPES = uploadAccept('document').split(',')
 
 export function ProjectFileUpload({ 
   projectId, 
   maxFiles = 5, 
-  maxFileSize = 10 * 1024 * 1024, // 10MB
+  maxFileSize = uploadPolicies.document.maxBytes,
   accept = SUPPORTED_FILE_TYPES.join(','),
   className 
 }: ProjectFileUploadProps) {
@@ -36,14 +33,14 @@ export function ProjectFileUpload({
   const { uploadProjectFiles, uploading } = useProjectOperations()
 
   const validateFile = (file: File): boolean => {
-    if (file.size > maxFileSize) {
-      toast.error(`File ${file.name} is too large. Max size is ${Math.round(maxFileSize / 1024 / 1024)}MB`)
+    const policyError = validateUploadFile(file, 'document')
+    if (policyError) {
+      toast.error(policyError)
       return false
     }
 
-    const fileExt = '.' + file.name.split('.').pop()?.toLowerCase()
-    if (!SUPPORTED_FILE_TYPES.includes(fileExt)) {
-      toast.error(`File type ${fileExt} is not supported`)
+    if (file.size > maxFileSize) {
+      toast.error(`File ${file.name} is too large. Max size is ${Math.round(maxFileSize / 1024 / 1024)}MB`)
       return false
     }
 

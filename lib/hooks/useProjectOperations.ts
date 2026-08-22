@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'react-hot-toast'
 import { getActiveWorkspaceId, getPrivateStorageUrl, workspaceStoragePath } from '@/lib/workspace'
+import { assertUploadFile } from '@/lib/upload-policy'
 
 export interface ProjectFileUploadResult {
   url: string
@@ -14,6 +15,7 @@ export function useProjectOperations() {
   const queryClient = useQueryClient()
 
   const uploadProjectFile = async (file: File, projectId: string): Promise<ProjectFileUploadResult> => {
+    assertUploadFile(file, 'document')
     // Generate unique filename
     const fileExt = file.name.split('.').pop()
     const workspaceId = await getActiveWorkspaceId()

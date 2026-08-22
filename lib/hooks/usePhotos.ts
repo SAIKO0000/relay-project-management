@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 import type { Database } from '../supabase.types'
 import { getActiveWorkspaceId, getCachedPrivateStorageUrl, workspaceStoragePath } from '../workspace'
+import { assertUploadFile } from '@/lib/upload-policy'
 
 type Photo = Database['public']['Tables']['photos']['Row']
 type PhotoInsert = Database['public']['Tables']['photos']['Insert']
@@ -59,6 +60,7 @@ export function usePhotos() {
       
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
+        assertUploadFile(file, 'photo')
         const fileExt = file.name.split('.').pop()
         const fileName = `${uploadDate}_${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`
         const filePath = workspaceStoragePath(workspaceId, 'photos', uploadDate, fileName)
@@ -175,7 +177,9 @@ export function usePhotos() {
   }
 
   useEffect(() => {
-    fetchPhotos()
+    queueMicrotask(() => {
+      void fetchPhotos()
+    })
   }, [])
 
   return {

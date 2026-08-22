@@ -20,6 +20,10 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const { signIn } = useAuth()
   const publicDemoUrl = process.env.NEXT_PUBLIC_PUBLIC_DEMO_URL
+  const accessRequestEmail = process.env.NEXT_PUBLIC_ACCESS_REQUEST_EMAIL
+  const accessRequestHref = accessRequestEmail
+    ? `mailto:${accessRequestEmail}?subject=${encodeURIComponent('ProjTrack private beta access request')}&body=${encodeURIComponent('Name:\nReason for testing:\nExpected testing dates:\n\nI agree to use only fictional or non-sensitive content and not upload illegal, offensive, confidential, copyrighted, or malicious material.')}`
+    : null
 
   // Set dynamic page title
   useEffect(() => {
@@ -207,6 +211,14 @@ export default function LoginPage() {
 
               <div className="rounded-lg border border-orange-200 bg-orange-50 p-3 text-center text-sm text-orange-900">
                 Private beta access is invitation-only. Approved testers receive an email invitation.
+                {accessRequestHref && (
+                  <a
+                    href={accessRequestHref}
+                    className="mt-2 block font-semibold text-orange-700 underline-offset-4 hover:underline"
+                  >
+                    Request private beta access
+                  </a>
+                )}
               </div>
 
               {publicDemoUrl && (

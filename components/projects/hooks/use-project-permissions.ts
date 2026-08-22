@@ -3,26 +3,25 @@ import { useAuth } from "@/lib/auth"
 import { usePersonnel } from "@/lib/hooks/usePersonnel"
 import { useReportsOptimized } from "@/lib/hooks/useReportsOptimized"
 import { type Project } from "../types/project-types"
+import { useWorkspaceAccess } from "@/lib/hooks/useWorkspaceAccess"
 
 export const useProjectPermissions = () => {
   const { user } = useAuth()
   const { personnel } = usePersonnel()
-
-  const userPosition = useMemo(() => user?.user_metadata?.position || "Team Member", [user])
-  const isAdmin = useMemo(() => 
-    ["Project Manager", "Senior Electrical Engineer", "Field Engineer", "Design Engineer"].includes(userPosition),
-    [userPosition]
-  )
+  const { role, isWorkspaceAdmin } = useWorkspaceAccess()
 
   const currentUserPersonnel = useMemo(() => 
     personnel.find(p => p.email === user?.email),
     [personnel, user?.email]
   )
 
+  const userPosition = currentUserPersonnel?.position || user?.user_metadata?.position || "Team Member"
+
   return {
     user,
     userPosition,
-    isAdmin,
+    isAdmin: isWorkspaceAdmin,
+    workspaceRole: role,
     currentUserPersonnel
   }
 }

@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { supabase, queryKeys } from '@/lib/supabase-query'
 import { toast } from 'react-hot-toast'
 import { getActiveWorkspaceId, workspaceStoragePath } from '@/lib/workspace'
+import { assertUploadFile } from '@/lib/upload-policy'
 
 // Base report interface - matches database schema
 interface Report {
@@ -163,6 +164,7 @@ export function useReportOperations() {
       assignedReviewer?: string
       title?: string
     }) => {
+      assertUploadFile(file, 'document')
       console.log('⬆️ Starting report upload via mutation...')
       
       // Generate unique filename

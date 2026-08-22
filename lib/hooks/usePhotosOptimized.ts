@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
 import { supabase, queryKeys } from '@/lib/supabase-query'
 import type { Database } from '@/lib/supabase.types'
@@ -9,6 +9,7 @@ import {
   getPrivateStorageUrl,
   workspaceStoragePath,
 } from '@/lib/workspace'
+import { assertUploadFile } from '@/lib/upload-policy'
 
 type Photo = Database['public']['Tables']['photos']['Row'] & {
   project?: { id: string; name: string }
@@ -189,6 +190,7 @@ export function usePhotoOperations() {
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
+        assertUploadFile(file, 'photo')
         setUploadProgress((i / files.length) * 100)
 
         // Upload to storage

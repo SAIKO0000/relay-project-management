@@ -9,7 +9,10 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test:private-beta": "node --test tests/private-beta-safeguards.test.mjs",
+    "private-beta:verify-isolation": "node --env-file=.env.private-beta.local scripts/verify-private-beta-isolation.mjs",
+    "private-beta:admin": "node --env-file=.env.private-beta.local scripts/private-beta-admin.mjs"
   },
   "dependencies": {
     "@21st-extension/react": "^0.5.14",

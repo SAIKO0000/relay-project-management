@@ -4,6 +4,7 @@
 do $$
 declare
   insecure_item text;
+  readiness jsonb;
 begin
   if to_regclass('public.workspaces') is null
      or to_regclass('public.workspace_members') is null then
@@ -104,7 +105,16 @@ begin
     raise exception 'An exposed application view is not security_invoker';
   end if;
 
-  raise notice 'PASS: private beta tables, policies, views, and Storage are fail-closed';
+  if to_regprocedure('public.private_beta_readiness()') is null then
+    raise exception 'Private beta safeguard migration has not been applied';
+  end if;
+
+  select public.private_beta_readiness() into readiness;
+  if not coalesce((readiness ->> 'ready')::boolean, false) then
+    raise exception 'Private beta safeguards are incomplete: %', readiness;
+  end if;
+
+  raise notice 'PASS: private beta isolation, quotas, write guards, views, and Storage are fail-closed';
 end;
 $$;
 

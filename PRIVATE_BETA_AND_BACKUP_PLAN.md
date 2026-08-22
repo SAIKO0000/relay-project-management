@@ -4,7 +4,11 @@ Last reviewed: August 23, 2026
 
 ## Implementation status
 
-Work is isolated on `feature/private-beta-auth`. The following foundation is implemented locally but **has not been applied to either remote Supabase project or deployed to Vercel**:
+Work is isolated on `feature/private-beta-auth`. The application and migration foundation is implemented locally but **has not been deployed**. A separate zero-cost Vercel project shell named `projtrack-private-beta` now exists with browser-safe production variables only; it remains undeployed until database verification passes. Automatic Git deployment is intentionally disconnected so an unrelated `main` push cannot launch live-backend mode prematurely.
+
+A read-only backend probe found workspace tables, three Auth users, and three private legacy buckets, but the safeguard readiness RPC and stricter bucket inventory are absent. This indicates partial/older configuration, not a verified migration. Do not invite external users yet.
+
+Local SQL validation is complete: both migrations apply cleanly to a disposable PostgreSQL baseline, the fail-closed security audit passes, and a newly inserted Auth user receives exactly one isolated workspace with one fictional starter project, two tasks, and one event. This validates the migration logic, but it does not replace testing against a restored backup of the real Supabase project.
 
 - `supabase/migrations/202608230001_private_beta_workspaces.sql` creates personal workspaces, membership roles, automatic invited-user provisioning, non-null tenant keys, workspace RLS, private Storage buckets, workspace/user-scoped object policies, and security-invoker views.
 - Next.js 16 now uses `@supabase/ssr` cookie sessions in live-backend mode. The deprecated `@supabase/auth-helpers-nextjs` dependency was removed.
@@ -12,6 +16,9 @@ Work is isolated on `feature/private-beta-auth`. The following foundation is imp
 - API routes that read or mutate user data use a caller-scoped Supabase client so RLS applies to their queries.
 - New reports, photos, attachments, and avatars use private workspace/user paths and signed URLs instead of permanent public URLs.
 - `scripts/verify-private-beta-security.sql` fails when a tenant table lacks RLS/non-null workspace ownership, a broad/anonymous policy remains, an application bucket is public, or an exposed view bypasses RLS.
+- `supabase/migrations/202608230002_private_beta_safeguards.sql` adds row quotas, write throttling, content limits, safe starter content, stricter private Storage limits, and a service-role-only readiness RPC.
+- `scripts/private-beta-admin.mjs` provides readiness-gated invitation, ban, and isolated-account cleanup commands with a default three-user cap.
+- `scripts/verify-private-beta-isolation.mjs` verifies two-account database and Storage isolation after deployment.
 
 The public demo remains the production-safe version on `main`; `NEXT_PUBLIC_DEMO_MODE=true` bypasses live auth and continues using browser-local fictional data.
 

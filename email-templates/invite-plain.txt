@@ -1,0 +1,10 @@
+ProjTrack private beta invitation
+
+You have been approved to test the private version of ProjTrack using {{ .Email }}.
+
+Your account receives an isolated workspace. Use fictional or non-sensitive content only, and do not upload illegal, offensive, confidential, copyrighted, or malicious material.
+
+Accept the invitation and set your password:
+{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=invite
+
+If you did not expect this invitation, ignore this message. Do not forward the link.

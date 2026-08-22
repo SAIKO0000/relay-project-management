@@ -11,6 +11,7 @@ import { useEvents } from "@/lib/hooks/useEvents"
 import { useSupabaseQuery } from "@/lib/hooks/useSupabaseQuery"
 import { usePhotosOptimized, usePhotoCountsByDate, usePhotosForDate, usePhotoOperations } from "@/lib/hooks/usePhotosOptimized"
 import { toast } from "@/lib/toast-manager"
+import { validateUploadFile } from "@/lib/upload-policy"
 
 // Import calendar components
 import { CalendarHeader } from "./CalendarHeader"
@@ -21,7 +22,6 @@ import { DayModal } from "./DayModal"
 
 // Import utilities and types
 import {
-  createThrottledFunction,
   formatDateToLocal,
   getEventTypeColor,
   getEventTypeDotColor,
@@ -100,30 +100,22 @@ export function Calendar() {
     return dayPhotosFromHook
   }, [dayPhotosFromHook, selectedDay]) // Remove searchQuery dependency
 
-  // Throttled refresh function
-  const throttledRefresh = useMemo(() => 
-    createThrottledFunction(async () => {
-      const now = Date.now()
-      if (now - lastRefreshRef.current < 30000) { // 30 seconds
-        toast.success("Calendar is already up to date")
-        return
-      }
-
-      try {
-        await fetchEvents()
-        lastRefreshRef.current = now
-        toast.success("Calendar refreshed successfully")
-      } catch (error) {
-        console.error('Error refreshing calendar:', error)
-        toast.error("Failed to refresh calendar")
-      }
-    }, 3000), // 3 second throttle
-    [fetchEvents]
-  )
-
   const handleRefresh = useCallback(async () => {
-    throttledRefresh()
-  }, [throttledRefresh])
+    const now = Date.now()
+    if (now - lastRefreshRef.current < 30000) {
+      toast.success("Calendar is already up to date")
+      return
+    }
+
+    try {
+      await fetchEvents()
+      lastRefreshRef.current = now
+      toast.success("Calendar refreshed successfully")
+    } catch (error) {
+      console.error('Error refreshing calendar:', error)
+      toast.error("Failed to refresh calendar")
+    }
+  }, [fetchEvents])
 
   // Handle navigation from notifications
   useEffect(() => {
@@ -132,13 +124,15 @@ export function Calendar() {
     
     if (navigateToDate && navigateToType === 'photo') {
       const targetDate = new Date(navigateToDate)
-      setSelectedDate(targetDate)
-      setSelectedDay(targetDate)
-      setShowDayModal(true)
-      
-      // Clear the navigation request
-      localStorage.removeItem('navigateToDate')
-      localStorage.removeItem('navigateToType')
+      queueMicrotask(() => {
+        setSelectedDate(targetDate)
+        setSelectedDay(targetDate)
+        setShowDayModal(true)
+
+        // Clear the navigation request
+        localStorage.removeItem('navigateToDate')
+        localStorage.removeItem('navigateToType')
+      })
     }
   }, [])
 
@@ -263,7 +257,19 @@ export function Calendar() {
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const newFiles = Array.from(event.target.files)
-      setUploadFiles(prev => [...prev, ...newFiles])
+      const validFiles = newFiles.filter(file => {
+        const validationError = validateUploadFile(file, 'photo')
+        if (validationError) toast.error(validationError)
+        return !validationError
+      })
+      setUploadFiles(prev => {
+        const combined = [...prev, ...validFiles]
+        if (combined.length > 10) {
+          toast.error('A maximum of 10 images can be uploaded at once.')
+        }
+        return combined.slice(0, 10)
+      })
+      event.target.value = ''
     }
   }
 
