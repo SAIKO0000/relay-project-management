@@ -94,7 +94,7 @@ try {
   assert.equal(unchanged.progress, 0, 'User B changed User A project.')
 
   storagePath = `${accountA.membership.workspace_id}/isolation/${crypto.randomUUID()}.txt`
-  const body = new Blob(['ProjTrack tenant isolation test'], { type: 'text/plain' })
+  const body = new Blob(['Relay tenant isolation test'], { type: 'text/plain' })
   const { error: uploadError } = await clientA.storage.from('project-documents').upload(storagePath, body)
   if (uploadError) throw uploadError
 

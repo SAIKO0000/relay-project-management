@@ -18,7 +18,7 @@ export function SidebarDesktopHeader({ collapsed, onToggleCollapsedAction }: Sid
             <div className="w-16 h-9 flex items-center justify-center rounded-xl shadow-sm">
               <Image 
                 src="/logo.svg" 
-                alt="GYG Power Systems" 
+                alt="Relay by GYG Power Systems"
                 width={52}
                 height={40}
                 className="w-full h-full object-contain transition-transform duration-300 hover:scale-105"
@@ -26,8 +26,8 @@ export function SidebarDesktopHeader({ collapsed, onToggleCollapsedAction }: Sid
               />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-gray-900 tracking-tight">GYG POWER SYSTEMS </h1>
-              
+              <h1 className="text-lg font-bold text-gray-900 tracking-tight">Relay</h1>
+              <p className="text-xs font-medium text-gray-500">Electrical Project Management</p>
             </div>
           </div>
           <Button variant="ghost" size="sm" onClick={onToggleCollapsedAction} className="p-2 hover:bg-gray-100/80 hover:shadow-sm transition-all duration-300 rounded-lg">
@@ -41,11 +41,11 @@ export function SidebarDesktopHeader({ collapsed, onToggleCollapsedAction }: Sid
             size="sm" 
             onClick={onToggleCollapsedAction} 
             className="p-0 w-full h-12 rounded-lg hover:bg-gray-100/80 hover:shadow-md transition-all duration-500 group border border-transparent hover:border-gray-200"
-            title="Expand sidebar - GYG Power Systems"
+            title="Expand Relay sidebar"
           >
             <Image 
               src="/logo.svg" 
-              alt="GYG Power Systems" 
+              alt="Relay by GYG Power Systems"
               width={52}
               height={40}
               className="w-12 h-9 object-contain group-hover:scale-110 transition-transform duration-500 filter group-hover:drop-shadow-sm"

@@ -1,21 +1,21 @@
 ---
-title: "ProjTrack Private Beta — Tester Access Runbook"
+title: "Relay Private Beta — Tester Access Runbook"
 subtitle: "Owner checklist for safely onboarding and removing real test users"
-date: "August 23, 2026"
+date: "August 24, 2026"
 ---
 
-# ProjTrack Private Beta — Tester Access Runbook
+# Relay Private Beta — Tester Access Runbook
 
 **Owner checklist for safely onboarding and removing real test users**  
-Last reviewed: August 23, 2026
+Last reviewed: August 24, 2026
 
 ## Current status
 
 **NOT READY FOR EXTERNAL TESTERS YET.**
 
-The application-side foundation and safeguards exist on `feature/private-beta-auth`. The separate zero-cost Vercel project `projtrack-private-beta` has been created and its browser-safe production variables are configured, but it has intentionally not been deployed. Automatic Git deployment is deliberately disconnected until Supabase passes readiness.
+The application-side foundation and safeguards exist on `feature/private-beta-auth`. The separate zero-cost Vercel project `relay-private-beta` has been created and its browser-safe production variables are configured, but it has intentionally not been deployed. Automatic Git deployment is deliberately disconnected until Supabase passes readiness.
 
-The configured Supabase backend is only partially ready: workspace tables exist, but the readiness RPC is absent, only three legacy buckets exist with older limits, and three Auth users already consume the configured three-user cap. Both migrations, the fail-closed audit, and invited-user starter provisioning pass against a disposable PostgreSQL test baseline. The same checks have not yet been applied to a restored copy of the real project, so treat the remote backend as unsafe until that validation passes.
+The configured Supabase backend passed its restored-backup rehearsal and live migration on August 24, 2026. The unrelated Auth user was removed, the two retained accounts are owner-controlled, both migrations applied successfully, and the fail-closed security audit passed. Public signup and anonymous sign-ins are disabled, while email confirmation remains enabled. Do not invite external testers until the remaining URL/template, deployment, and two-account isolation checks pass.
 
 Do not invite an external tester until every item in the one-time launch checklist is complete.
 
@@ -39,21 +39,22 @@ There is no public signup and no shared demo password. Every tester receives a s
 
 Complete this once before accepting any real tester.
 
-- [ ] Back up the candidate private Supabase database and Storage objects.
-- [ ] Restore the backup into a disposable or local Supabase environment.
-- [ ] Apply both private-beta migrations to the disposable environment first, in filename order.
-- [ ] Run `scripts/verify-private-beta-security.sql` successfully.
+- [x] Back up `projtrack-portfolio` Supabase (`qdagzcivuddbztsybxfk`) database and Storage objects. Two verified backups were created August 23, 2026; the latest reflects the completed Auth-user review.
+- [x] Restore the current post-review backup into a disposable PostgreSQL environment.
+- [x] Apply both private-beta migrations to the restored disposable environment, in filename order.
+- [x] Run `scripts/verify-private-beta-security.sql` successfully against the restored real-project backup.
 - [x] Apply both migrations to a disposable synthetic baseline and verify fail-closed security plus automatic starter provisioning.
 - [ ] Test two unrelated invited accounts and confirm neither can read, change, delete, subscribe to, download, or guess the other account's records and files.
 - [ ] Test two controlled accounts in one shared workspace if collaboration will be demonstrated.
 - [ ] Resolve any migration, RLS, Storage, and strict-TypeScript failures without weakening the security checks.
-- [ ] Apply both verified migrations to `GYG_ProjTrack's Project`, never to the public-demo backend.
-- [x] Create the separate `projtrack-private-beta` Vercel project shell.
+- [x] Apply both verified migrations to `projtrack-portfolio` Supabase (`qdagzcivuddbztsybxfk`) only and pass the live fail-closed audit. Completed August 24, 2026; `GYG_ProjTrack's Project` (`qvoockauodrptvyqqqbe`) remained untouched.
+- [x] Apply `202608240001_relay_branding.sql` after the product rename so newly invited users receive Relay starter text. Completed August 24, 2026.
+- [x] Create the separate `relay-private-beta` Vercel project shell.
 - [x] Set `NEXT_PUBLIC_DEMO_MODE=false` only on the private-beta production environment.
 - [x] Configure only the private Supabase URL and publishable key on that deployment. No service-role key was added.
 - [ ] Reconnect the Vercel project to Git only after the verified private-beta code is merged into the intended production branch.
-- [ ] In Supabase Auth, disable new-user signup and anonymous sign-ins; keep email confirmation enabled.
-- [ ] Set the Supabase Site URL to the exact private-beta production URL and allow the required `/auth/confirm` and `/auth/reset-password` redirects.
+- [x] In Supabase Auth, disable new-user signup and anonymous sign-ins; keep email confirmation enabled.
+- [x] Set the Supabase Site URL to `https://relay-private-beta.vercel.app` and allow its exact `/auth/confirm` and `/auth/reset-password` redirects.
 - [ ] Configure and test the invitation email so it opens `/auth/confirm`, establishes a session, and sends the tester to `/auth/reset-password`.
 - [x] Add conservative upload limits, MIME-type restrictions, per-workspace quotas, write throttling, a three-user CLI cap, and isolated-account cleanup tooling.
 - [x] Add fictional starter-data onboarding for newly created workspaces.
@@ -79,7 +80,7 @@ npm run private-beta:admin -- cleanup --email person@example.com --confirm perso
 - Create and verify backups before applying a migration.
 - Apply SQL through an authenticated Supabase database connection or SQL Editor when no Management API/CLI token and database password are available.
 - Disable signup/anonymous access, set Auth URLs, and paste/test email templates in the Supabase dashboard.
-- Review the three existing Auth users and remove or retain them before opening a new invitation slot.
+- Review existing Auth users before opening an invitation slot. Completed August 23, 2026: one unrelated user removed and two owner accounts retained.
 - Choose the public contact email used by the access-request link.
 - Confirm the organization billing pages still show Free/Hobby with no trial or paid add-on.
 - Reconnect Git and authorize the first production deployment only after every readiness and isolation test passes.
@@ -213,6 +214,7 @@ Cleanup verified by: ______________________________
 - `PRIVATE_BETA_AND_BACKUP_PLAN.md`
 - `supabase/migrations/202608230001_private_beta_workspaces.sql`
 - `supabase/migrations/202608230002_private_beta_safeguards.sql`
+- `supabase/migrations/202608240001_relay_branding.sql`
 - `scripts/verify-private-beta-security.sql`
 - `scripts/private-beta-admin.mjs`
 - `scripts/verify-private-beta-isolation.mjs`

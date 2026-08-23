@@ -104,7 +104,7 @@ export const useAutoNotifications = () => {
         if (hasPermission) {
           try {
             await mobileService.sendMobileNotification({
-              title: '🔔 ProjTrack Login Detected',
+              title: '🔔 Relay Login Detected',
               body: `Welcome back, ${user.email}! Checking for deadline notifications...`,
               icon: '/logo.svg',
               tag: 'login-test',
@@ -114,7 +114,7 @@ export const useAutoNotifications = () => {
             console.error('❌ Failed to send test notification:', error);
             // Fallback to basic notification
             if ('Notification' in window && Notification.permission === 'granted') {
-              new Notification('🔔 ProjTrack Login Detected', {
+              new Notification('🔔 Relay Login Detected', {
                 body: `Welcome back, ${user.email}! Checking for deadline notifications...`,
                 icon: '/logo.svg',
                 tag: 'login-test'

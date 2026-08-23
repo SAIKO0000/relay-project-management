@@ -12,7 +12,8 @@
     "lint": "eslint .",
     "test:private-beta": "node --test tests/private-beta-safeguards.test.mjs",
     "private-beta:verify-isolation": "node --env-file=.env.private-beta.local scripts/verify-private-beta-isolation.mjs",
-    "private-beta:admin": "node --env-file=.env.private-beta.local scripts/private-beta-admin.mjs"
+    "private-beta:admin": "node --env-file=.env.private-beta.local scripts/private-beta-admin.mjs",
+    "private-beta:backup": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/backup-private-beta.ps1"
   },
   "dependencies": {
     "@21st-extension/react": "^0.5.14",

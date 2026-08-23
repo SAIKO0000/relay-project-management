@@ -1,6 +1,6 @@
-ProjTrack private beta invitation
+Relay private beta invitation
 
-You have been approved to test the private version of ProjTrack using {{ .Email }}.
+You have been approved to test the private version of Relay using {{ .Email }}.
 
 Your account receives an isolated workspace. Use fictional or non-sensitive content only, and do not upload illegal, offensive, confidential, copyrighted, or malicious material.
 

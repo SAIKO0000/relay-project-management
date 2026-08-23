@@ -45,15 +45,15 @@ export function SidebarMobileMenu({
           <div className="flex items-center space-x-3">
             <Image 
               src="/logo.svg" 
-              alt="GYG Power Systems" 
+              alt="Relay by GYG Power Systems"
               width={56}
               height={42}
               className="w-14 h-10.5 object-contain"
               priority
             />
             <div>
-              <h1 className="text-base font-semibold text-gray-900">GYG Power Systems</h1>
-
+              <h1 className="text-base font-semibold text-gray-900">Relay</h1>
+              <p className="text-xs font-medium text-gray-500">Electrical Project Management</p>
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-Reset your ProjTrack password
+Reset your Relay password
 
 Open this link to choose a new password for {{ .Email }}:
 {{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery

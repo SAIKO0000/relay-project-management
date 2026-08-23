@@ -1,14 +1,16 @@
-# ProjTrack Deployment Modes and Backup Plan
+# Relay Deployment Modes and Backup Plan
 
-Last reviewed: August 23, 2026
+Last reviewed: August 24, 2026
 
 ## Implementation status
 
-Work is isolated on `feature/private-beta-auth`. The application and migration foundation is implemented locally but **has not been deployed**. A separate zero-cost Vercel project shell named `projtrack-private-beta` now exists with browser-safe production variables only; it remains undeployed until database verification passes. Automatic Git deployment is intentionally disconnected so an unrelated `main` push cannot launch live-backend mode prematurely.
+Work is isolated on `feature/private-beta-auth`. The application and migration foundation is implemented locally but **has not been deployed**. A separate zero-cost Vercel project shell named `relay-private-beta` exists with browser-safe production variables only; it remains undeployed until database verification passes. Automatic Git deployment is intentionally disconnected so an unrelated `main` push cannot launch live-backend mode prematurely.
 
-A read-only backend probe found workspace tables, three Auth users, and three private legacy buckets, but the safeguard readiness RPC and stricter bucket inventory are absent. This indicates partial/older configuration, not a verified migration. Do not invite external users yet.
+The live backend now has two owner-controlled Auth users, six hardened private buckets, tenant workspaces, quotas, write guards, and a passing readiness RPC. The unrelated third Auth user was removed after owner review. Do not invite external users until the private deployment and two-account isolation test also pass.
 
-Local SQL validation is complete: both migrations apply cleanly to a disposable PostgreSQL baseline, the fail-closed security audit passes, and a newly inserted Auth user receives exactly one isolated workspace with one fictional starter project, two tasks, and one event. This validates the migration logic, but it does not replace testing against a restored backup of the real Supabase project.
+Local SQL validation is complete. Both migrations apply cleanly to a disposable synthetic baseline, and a newly inserted Auth user receives exactly one isolated workspace with one fictional starter project, two tasks, and one event. A second rehearsal restored the current real `qdagzcivuddbztsybxfk` database backup into a disposable PostgreSQL instance, preserved both owner Auth users and all public application rows, applied both migrations, and passed `scripts/verify-private-beta-security.sql`. Both migrations, the fail-closed audit, and the follow-up Relay branding migration subsequently passed on the live Supabase project on August 24, 2026.
+
+Two pre-migration logical backups of `qdagzcivuddbztsybxfk` were completed and independently verified on August 23, 2026. The latest backup was taken after Auth review and contains the two retained owner accounts, roles, schema, public application data, all six current Storage objects across three buckets, and a SHA-256 manifest in the owner-only Documents backup folder. Supabase Auth passwords are not recoverable from this logical backup.
 
 - `supabase/migrations/202608230001_private_beta_workspaces.sql` creates personal workspaces, membership roles, automatic invited-user provisioning, non-null tenant keys, workspace RLS, private Storage buckets, workspace/user-scoped object policies, and security-invoker views.
 - Next.js 16 now uses `@supabase/ssr` cookie sessions in live-backend mode. The deprecated `@supabase/auth-helpers-nextjs` dependency was removed.
@@ -17,6 +19,7 @@ Local SQL validation is complete: both migrations apply cleanly to a disposable 
 - New reports, photos, attachments, and avatars use private workspace/user paths and signed URLs instead of permanent public URLs.
 - `scripts/verify-private-beta-security.sql` fails when a tenant table lacks RLS/non-null workspace ownership, a broad/anonymous policy remains, an application bucket is public, or an exposed view bypasses RLS.
 - `supabase/migrations/202608230002_private_beta_safeguards.sql` adds row quotas, write throttling, content limits, safe starter content, stricter private Storage limits, and a service-role-only readiness RPC.
+- `supabase/migrations/202608240001_relay_branding.sql` updates the user-visible starter project text without rewriting the two migrations already applied to the live database.
 - `scripts/private-beta-admin.mjs` provides readiness-gated invitation, ban, and isolated-account cleanup commands with a default three-user cap.
 - `scripts/verify-private-beta-isolation.mjs` verifies two-account database and Storage isolation after deployment.
 
@@ -24,7 +27,7 @@ The public demo remains the production-safe version on `main`; `NEXT_PUBLIC_DEMO
 
 ### Required validation before any remote change
 
-1. Export the candidate `GYG_ProjTrack's Project` database and Storage objects.
+1. Export the `projtrack-portfolio` Supabase project (`qdagzcivuddbztsybxfk`) database and Storage objects.
 2. Restore the export into a disposable/local Supabase environment.
 3. Apply the workspace migration there first. A migration error rolls the transaction back; do not weaken the failing check to force it through.
 4. Run `scripts/verify-private-beta-security.sql`.
@@ -41,7 +44,7 @@ Keep one repository and one maintained codebase, with two isolated deployments:
 | Environment | Audience | Data source | Access |
 | --- | --- | --- | --- |
 | Public portfolio demo | Recruiters and visitors | Browser-local fictional seed data | Public URL, no account required |
-| Private beta | Individually approved testers | A separate Supabase project | Invite-only Supabase accounts |
+| Private beta | Individually approved testers | `projtrack-portfolio` Supabase (`qdagzcivuddbztsybxfk`) | Invite-only Supabase accounts |
 
 Do not create a permanent copy of the application or maintain unrelated "demo" and "real" branches. They will drift, duplicate fixes, and make security reviews harder. Use short-lived feature branches for development, merge reviewed work into `main`, and select behavior through deployment-specific environment variables.
 
@@ -51,19 +54,19 @@ The current `main` branch is the public-demo checkpoint. Do not create the priva
 
 ### Public portfolio deployment
 
-- Vercel project: the existing `projtrack-portfolio` deployment.
+- Vercel project: the public `relay-portfolio-demo` deployment.
 - Branch: `main`.
 - Set `NEXT_PUBLIC_DEMO_MODE=true`.
 - Do not expose Supabase, Firebase, or service-role credentials to the browser.
 - Keep all visitor changes in IndexedDB/local browser storage and offer **Reset demo**.
-- Keep the public Supabase project locked down with `sql/portfolio_demo_lockdown.sql`; it should only serve the harmless keepalive query if it is retained at all.
+- Do not use Supabase for public-demo application data. Move the guarded keepalive to the private-beta deployment before removing the public deployment's Supabase variables.
 
 ### Private beta deployment
 
 - Create a second Vercel project connected to this same GitHub repository and `main` branch.
-- Give it a separate URL, such as `projtrack-private-beta.vercel.app`.
+- Give it the separate URL `relay-private-beta.vercel.app`.
 - Set `NEXT_PUBLIC_DEMO_MODE=false` only in that Vercel project.
-- Connect it to a separate Supabase project. Never connect the private database to the public demo deployment.
+- Connect it to `projtrack-portfolio` Supabase (`qdagzcivuddbztsybxfk`), which contains the application schema currently configured by this repository. The public demo must stay in browser-local mode and must not use that backend for visitor data.
 - Keep all Supabase secret/service keys server-only. The browser receives only the project URL and publishable key; Row Level Security remains the real authorization boundary.
 - During implementation, use ordinary short-lived branches such as `feature/private-beta-auth`. Merge only after both demo-mode and live-backend tests pass.
 
@@ -170,12 +173,12 @@ The repository ignores `/backups/` as an accident-prevention measure, but the pr
 
 ## Current Supabase project mapping
 
-The GYG organization currently contains `projtrack-portfolio` and `GYG_ProjTrack's Project`. The safe proposed mapping is:
+The GYG organization currently contains `projtrack-portfolio` (`qdagzcivuddbztsybxfk`) and `GYG_ProjTrack's Project` (`qvoockauodrptvyqqqbe`). Dashboard verification established that the repository currently connects to `qdagzcivuddbztsybxfk`, and the read-only audit found the application's tables, Storage buckets, and two retained owner Auth users there. The corrected mapping is:
 
-- `projtrack-portfolio`: locked-down public-demo keepalive project.
-- `GYG_ProjTrack's Project`: candidate private-beta backend, but only after a backup and complete RLS/security audit.
+- `projtrack-portfolio` (`qdagzcivuddbztsybxfk`): candidate private-beta backend, but only after a backup and complete RLS/security audit.
+- `GYG_ProjTrack's Project` (`qvoockauodrptvyqqqbe`): unassigned/legacy project. Leave it untouched and allow it to pause until its contents are separately reviewed.
 
-Do not assume the second project is safe merely because it already exists. Its schema, Auth configuration, RLS policies, Storage policies, secrets, and existing data must be audited before any tester receives access.
+Do not migrate both projects. The public portfolio deployment remains backend-free for visitor data; only the selected `qdagzcivuddbztsybxfk` backend is prepared for invited testers.
 
 ## References
 

@@ -104,8 +104,8 @@ export const FCMDebugger = {
     if (Notification.permission === 'granted') {
       console.log('🧪 Testing notification display...');
       
-      const notification = new Notification('ProjTrack Test', {
-        body: 'This is a test notification from ProjTrack',
+      const notification = new Notification('Relay Test', {
+        body: 'This is a test notification from Relay',
         icon: '/logo.svg',
         tag: 'test-notification'
       });

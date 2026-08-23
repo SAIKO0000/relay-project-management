@@ -24,7 +24,7 @@ export function SidebarMobileHeader({
           <div className="flex h-8 w-10 items-center justify-center rounded-lg border border-gray-100 bg-white shadow-sm sm:h-10 sm:w-12">
             <Image 
               src="/logo.svg" 
-              alt="GYG Power Systems" 
+              alt="Relay by GYG Power Systems"
               width={40}
               height={30}
               className="w-8 h-6 sm:w-10 sm:h-7 object-contain"
@@ -32,8 +32,8 @@ export function SidebarMobileHeader({
             />
           </div>
           <div className="min-w-0">
-            <h1 className="truncate text-sm font-bold tracking-tight text-gray-900 sm:text-base">GYG Power Systems</h1>
-            <p className="text-xs text-gray-600 font-medium hidden sm:block">Electrical Engineering Solutions</p>
+            <h1 className="truncate text-sm font-bold tracking-tight text-gray-900 sm:text-base">Relay</h1>
+            <p className="hidden text-xs font-medium text-gray-600 sm:block">Electrical Project Management</p>
           </div>
         </div>
         <Button 

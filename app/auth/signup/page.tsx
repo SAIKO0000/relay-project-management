@@ -42,7 +42,7 @@ export default function SignUpPage() {
 
   // Set dynamic page title
   useEffect(() => {
-    document.title = "GYG Power Systems - Sign Up"
+    document.title = "Create Account | Relay"
   }, [])
 
   const handleInputChange = useCallback((field: string, value: string) => {
@@ -113,7 +113,7 @@ export default function SignUpPage() {
           <div className="mx-auto w-32 h-32 mb-6">
             <Image 
               src="/logo.svg" 
-              alt="GYG Power Systems" 
+              alt="Relay by GYG Power Systems"
               width={128}
               height={128}
               className="w-full h-full object-contain"
@@ -124,7 +124,7 @@ export default function SignUpPage() {
             Join Our Team
           </h1>
           <p className="text-gray-600 mt-2">
-            Create your account to start managing projects
+            Create your Relay account to start managing projects
           </p>
         </div>
 
@@ -343,7 +343,7 @@ export default function SignUpPage() {
 
         {/* Footer */}
         <div className="text-center text-sm text-gray-500">
-          <p>© 2025 GYG Power Systems. All rights reserved.</p>
+          <p>Relay · Electrical project management by GYG Power Systems</p>
         </div>
       </div>
     </div>

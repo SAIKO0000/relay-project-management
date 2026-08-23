@@ -69,3 +69,41 @@ test('browser-visible environment variables never include a service-role secret'
   const envExample = await read('.env.example')
   assert.doesNotMatch(envExample, /NEXT_PUBLIC_[A-Z0-9_]*SERVICE_ROLE/)
 })
+
+test('Relay branding is applied through a follow-up migration', async () => {
+  const sql = await read('supabase/migrations/202608240001_relay_branding.sql')
+  assert.match(sql, /^begin;/im)
+  assert.match(sql, /create or replace function private\.seed_private_beta_workspace/i)
+  assert.match(sql, /evaluating Relay/)
+  assert.match(sql, /^commit;/im)
+})
+
+test('backup tooling is pinned to qdag and refuses repository output', async () => {
+  const [runner, storage] = await Promise.all([
+    read('scripts/backup-private-beta.ps1'),
+    read('scripts/backup-private-beta-storage.mjs'),
+  ])
+  assert.match(runner, /qdagzcivuddbztsybxfk/)
+  assert.match(runner, /OutputDirectory must be outside the Git repository/i)
+  assert.match(runner, /--role-only/)
+  assert.match(runner, /--data-only.*--use-copy/)
+  assert.match(storage, /Refusing Storage backup inside the Git repository/i)
+  assert.match(storage, /sha256/)
+  assert.doesNotMatch(`${runner}\n${storage}`, /console\.log\([^\n]*serviceRoleKey/)
+})
+
+test('disposable restore fixtures limit imported data to migration prerequisites', async () => {
+  const [filter, prelude] = await Promise.all([
+    read('tests/fixtures/filter-private-beta-restore-data.awk'),
+    read('tests/fixtures/private-beta-storage-restore-prelude.sql'),
+  ])
+
+  assert.match(filter, /"auth"\\\."users"/)
+  assert.match(filter, /public/)
+  assert.match(filter, /"storage"\\\."buckets"/)
+  assert.match(filter, /"storage"\\\."objects"/)
+  assert.doesNotMatch(filter, /"auth"\\\."sessions"|"auth"\\\."refresh_tokens"/)
+  assert.match(prelude, /create schema if not exists storage/i)
+  assert.match(prelude, /alter table storage\.objects enable row level security/i)
+  assert.match(prelude, /create publication supabase_realtime/i)
+})

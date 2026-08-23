@@ -22,12 +22,12 @@ export default function LoginPage() {
   const publicDemoUrl = process.env.NEXT_PUBLIC_PUBLIC_DEMO_URL
   const accessRequestEmail = process.env.NEXT_PUBLIC_ACCESS_REQUEST_EMAIL
   const accessRequestHref = accessRequestEmail
-    ? `mailto:${accessRequestEmail}?subject=${encodeURIComponent('ProjTrack private beta access request')}&body=${encodeURIComponent('Name:\nReason for testing:\nExpected testing dates:\n\nI agree to use only fictional or non-sensitive content and not upload illegal, offensive, confidential, copyrighted, or malicious material.')}`
+    ? `mailto:${accessRequestEmail}?subject=${encodeURIComponent('Relay private beta access request')}&body=${encodeURIComponent('Name:\nReason for testing:\nExpected testing dates:\n\nI agree to use only fictional or non-sensitive content and not upload illegal, offensive, confidential, copyrighted, or malicious material.')}`
     : null
 
   // Set dynamic page title
   useEffect(() => {
-    document.title = "GYG Power Systems - Login"
+    document.title = "Sign In | Relay"
   }, [])
 
   // Load saved credentials on component mount
@@ -90,7 +90,7 @@ export default function LoginPage() {
           <div className="mx-auto w-32 h-32 mb-6">
             <Image 
               src="/logo.svg" 
-              alt="GYG Power Systems" 
+              alt="Relay by GYG Power Systems"
               width={128}
               height={128}
               className="w-full h-full object-contain"
@@ -98,7 +98,7 @@ export default function LoginPage() {
             />
           </div>
           <h1 className="text-3xl font-bold text-gray-800">
-            Welcome Back
+            Welcome back to Relay
           </h1>
           <p className="text-gray-600 mt-2">
             Sign in to access your project dashboard
@@ -237,7 +237,7 @@ export default function LoginPage() {
 
         {/* Footer */}
         <div className="text-center text-sm text-gray-500">
-          <p>© 2025 GYG Power Systems. All rights reserved.</p>
+          <p>Relay · Electrical project management by GYG Power Systems</p>
         </div>
       </div>
     </div>

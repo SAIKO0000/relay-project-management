@@ -235,7 +235,7 @@ async function cleanup() {
 
 function help() {
   console.log(`
-ProjTrack private-beta owner CLI
+Relay private-beta owner CLI
 
   npm run private-beta:admin -- status
   npm run private-beta:admin -- invite --email person@example.com --name "Person Name" --position "Project Manager"

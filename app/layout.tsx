@@ -17,8 +17,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GYG Power Systems - Dashboard",
-  description: "Project management system for electrical engineering projects",
+  title: {
+    default: "Relay | Electrical Project Management",
+    template: "%s | Relay",
+  },
+  description: "Relay keeps electrical engineering projects, tasks, milestones, teams, and documents moving together.",
+  applicationName: "Relay",
   icons: {
     icon: '/logo.svg',
     shortcut: '/logo.svg',

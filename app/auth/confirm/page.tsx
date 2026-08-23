@@ -92,7 +92,7 @@ function ConfirmPageContent() {
               </div>
               <CardTitle className="text-xl font-bold text-gray-900">Email Confirmed!</CardTitle>
               <CardDescription>
-                Welcome to GYG Power Systems Project Management
+                Welcome to Relay
               </CardDescription>
             </>
           )}
