@@ -1,36 +1,39 @@
 "use client"
 
 import { supabase } from './supabase'
+import { getPrivateStorageUrl, userAvatarStoragePath } from './workspace'
 
 export interface UploadResult {
   success: boolean
   url?: string
+  path?: string
   error?: string
 }
 
 /**
  * Upload profile picture to Supabase storage
  */
-export async function uploadProfilePicture(
-  file: File, 
-  userId: string
-): Promise<UploadResult> {
+export async function uploadProfilePicture(file: File): Promise<UploadResult> {
   try {
     // Validate file type
-    if (!file.type.startsWith('image/')) {
-      return { success: false, error: 'Please upload an image file' }
+    const allowedTypes = new Set(['image/jpeg', 'image/png', 'image/webp'])
+    if (!allowedTypes.has(file.type)) {
+      return { success: false, error: 'Please upload a JPEG, PNG, or WebP image' }
     }
 
-    // Validate file size (max 50MB)
-    const maxSize = 50 * 1024 * 1024 // 50MB
+    // Match the private bucket limit so oversized files never reach Storage.
+    const maxSize = 2 * 1024 * 1024
     if (file.size > maxSize) {
-      return { success: false, error: 'File size must be less than 50MB' }
+      return { success: false, error: 'File size must be less than 2MB' }
     }
 
-    // Create unique filename
-    const fileExt = file.name.split('.').pop()
-    const fileName = `${userId}-${Date.now()}.${fileExt}`
-    const filePath = `${fileName}` // Store directly in the bucket root
+    const { data: userData, error: userError } = await supabase.auth.getUser()
+    if (userError || !userData.user) {
+      return { success: false, error: 'You must be signed in to upload an image' }
+    }
+
+    const fileExt = file.name.split('.').pop() || 'jpg'
+    const filePath = userAvatarStoragePath(userData.user.id, fileExt)
 
     // Upload to Supabase Storage
     const { error: uploadError } = await supabase.storage
@@ -45,16 +48,12 @@ export async function uploadProfilePicture(
       return { success: false, error: 'Failed to upload image' }
     }
 
-    // Get public URL
-    const { data: urlData } = supabase.storage
-      .from('avatars')
-      .getPublicUrl(filePath)
-
-    if (!urlData.publicUrl) {
+    const signedUrl = await getPrivateStorageUrl('avatars', filePath)
+    if (!signedUrl) {
       return { success: false, error: 'Failed to get image URL' }
     }
 
-    return { success: true, url: urlData.publicUrl }
+    return { success: true, url: signedUrl, path: filePath }
   } catch (error) {
     console.error('Profile picture upload error:', error)
     return { success: false, error: 'Failed to upload profile picture' }
@@ -64,20 +63,16 @@ export async function uploadProfilePicture(
 /**
  * Delete old profile picture from storage
  */
-export async function deleteProfilePicture(avatarUrl: string): Promise<void> {
+export async function deleteProfilePicture(avatarPathOrUrl: string): Promise<void> {
   try {
-    // Extract file path from URL
-    const url = new URL(avatarUrl)
-    const pathSegments = url.pathname.split('/')
-    const bucketIndex = pathSegments.findIndex(segment => segment === 'avatars')
-    
-    if (bucketIndex === -1) {
-      console.warn('Invalid avatar URL format:', avatarUrl)
-      return
+    let filePath = avatarPathOrUrl
+    if (/^https?:\/\//i.test(avatarPathOrUrl)) {
+      const url = new URL(avatarPathOrUrl)
+      const marker = '/avatars/'
+      const markerIndex = url.pathname.indexOf(marker)
+      if (markerIndex === -1) return
+      filePath = decodeURIComponent(url.pathname.slice(markerIndex + marker.length))
     }
-
-    // Get the filename (should be directly in the bucket root now)
-    const filePath = pathSegments[pathSegments.length - 1]
     
     const { error } = await supabase.storage
       .from('avatars')
@@ -128,19 +123,20 @@ export async function updateProfilePicture(
 ): Promise<UploadResult> {
   try {
     // Upload new picture
-    const uploadResult = await uploadProfilePicture(file, personnelId)
+    const uploadResult = await uploadProfilePicture(file)
     
-    if (!uploadResult.success || !uploadResult.url) {
+    if (!uploadResult.success || !uploadResult.url || !uploadResult.path) {
       return uploadResult
     }
 
-    // Update database
-    const updateResult = await updatePersonnelAvatar(personnelId, uploadResult.url)
+    // Persist only the private object path. Components resolve short-lived
+    // signed URLs at display time, so no permanent public media URL is stored.
+    const updateResult = await updatePersonnelAvatar(personnelId, uploadResult.path)
     
     if (!updateResult.success) {
       // If database update fails, clean up uploaded file
       try {
-        await deleteProfilePicture(uploadResult.url)
+        await deleteProfilePicture(uploadResult.path)
       } catch (cleanupError) {
         console.error('Cleanup error:', cleanupError)
       }
@@ -150,7 +146,7 @@ export async function updateProfilePicture(
     // Dispatch a custom event to notify all components about the avatar update
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('avatarUpdated', { 
-        detail: { personnelId, avatarUrl: uploadResult.url } 
+        detail: { personnelId, avatarUrl: uploadResult.path }
       }))
     }
 
@@ -164,7 +160,7 @@ export async function updateProfilePicture(
       }
     }
 
-    return { success: true, url: uploadResult.url }
+    return { success: true, url: uploadResult.url, path: uploadResult.path }
   } catch (error) {
     console.error('Complete profile picture update error:', error)
     return { success: false, error: 'Failed to update profile picture' }

@@ -1,4 +1,4 @@
-# ProjTrack portfolio screenshots
+# Relay portfolio screenshots
 
 All screenshots were captured from the live Demo Mode deployment at 1600 × 1000 pixels. Demo records are isolated to the capture browser.
 
@@ -15,13 +15,13 @@ All screenshots were captured from the live Demo Mode deployment at 1600 × 1000
 
 ## Suggested alt text
 
-- Dashboard: “ProjTrack portfolio dashboard with project KPIs, progress chart, status distribution, and project navigation.”
-- Gantt: “ProjTrack Gantt chart with task metrics, filters, monthly timeline, assignees, and progress bars.”
-- Reports: “ProjTrack document-control workspace with approval states, reviewer notes, filters, and file actions.”
-- Projects: “ProjTrack project portfolio with search, status filters, review assignment, KPIs, and project cards.”
-- Calendar: “ProjTrack scheduling calendar with project filters and upcoming engineering events.”
-- Team: “ProjTrack team directory with personnel metrics, engineering roles, availability, and profile actions.”
-- Notifications: “ProjTrack activity center with notification metrics, filtering, project forecasts, and recent updates.”
-- Create project: “ProjTrack create-project form with client, location, status, team size, and schedule fields.”
+- Dashboard: “Relay portfolio dashboard with project KPIs, progress chart, status distribution, and project navigation.”
+- Gantt: “Relay Gantt chart with task metrics, filters, monthly timeline, assignees, and progress bars.”
+- Reports: “Relay document-control workspace with approval states, reviewer notes, filters, and file actions.”
+- Projects: “Relay project portfolio with search, status filters, review assignment, KPIs, and project cards.”
+- Calendar: “Relay scheduling calendar with project filters and upcoming engineering events.”
+- Team: “Relay team directory with personnel metrics, engineering roles, availability, and profile actions.”
+- Notifications: “Relay activity center with notification metrics, filtering, project forecasts, and recent updates.”
+- Create project: “Relay create-project form with client, location, status, team size, and schedule fields.”
 
 For a concise case study, use Dashboard, Gantt, Reports, and Projects. The remaining images work well in a carousel or feature gallery.

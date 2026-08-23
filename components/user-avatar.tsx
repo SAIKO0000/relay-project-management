@@ -1,6 +1,7 @@
 "use client"
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { usePrivateStorageUrl } from '@/lib/hooks/usePrivateStorageUrl'
 
 interface UserAvatarProps {
   avatarUrl?: string | null
@@ -10,6 +11,7 @@ interface UserAvatarProps {
 }
 
 export function UserAvatar({ avatarUrl, userName, size = 'md', className = '' }: UserAvatarProps) {
+  const resolvedAvatarUrl = usePrivateStorageUrl('avatars', avatarUrl)
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -39,7 +41,7 @@ export function UserAvatar({ avatarUrl, userName, size = 'md', className = '' }:
   return (
     <Avatar className={`${getSizeClasses()} ${className}`}>
       <AvatarImage 
-        src={avatarUrl || ""} 
+        src={resolvedAvatarUrl}
         alt={userName}
         className="object-cover"
       />

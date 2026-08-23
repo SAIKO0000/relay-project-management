@@ -1,13 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createClient } from '@supabase/supabase-js'
+import { createBrowserClient } from '@supabase/ssr'
 import type { Database } from './supabase.types'
 import { isDemoMode } from './demo/config'
 import { createDemoSupabaseClient } from './demo/supabase-client'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://demo.invalid'
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'demo-publishable-key'
+const configuredSupabasePublishableKey =
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const supabasePublishableKey = configuredSupabasePublishableKey || 'demo-publishable-key'
 
-if (!isDemoMode && (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)) {
+if (!isDemoMode && (!process.env.NEXT_PUBLIC_SUPABASE_URL || !configuredSupabasePublishableKey)) {
   throw new Error('Missing Supabase environment variables for live-backend mode')
 }
 
@@ -15,10 +18,8 @@ if (!isDemoMode && (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_P
 // public portfolio build it is replaced with a browser-local implementation.
 export const supabase: any = isDemoMode
   ? createDemoSupabaseClient()
-  : createClient<Database>(supabaseUrl, supabaseAnonKey, {
+  : createBrowserClient<Database>(supabaseUrl, supabasePublishableKey, {
       auth: {
-        persistSession: true,
-        autoRefreshToken: true,
         detectSessionInUrl: true,
       },
       realtime: {

@@ -1,4 +1,4 @@
-// Retirement worker for the legacy ProjTrack notification/cache worker.
+// Retirement worker for notification/cache data created before the Relay rename.
 // It intentionally has no fetch or push handlers.
 self.addEventListener('install', () => self.skipWaiting())
 

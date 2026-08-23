@@ -375,7 +375,7 @@ const createStorageBucket = (bucket: string) => ({
   download: async (path: string) => {
     const stored = memoryFiles.get(`${bucket}/${path}`)
     const fallback = new Blob([
-      `ProjTrack browser-local demo file\n\nPath: ${path}\n\nThis placeholder represents a file that would be stored in Supabase Storage in live backend mode.`,
+      `Relay browser-local demo file\n\nPath: ${path}\n\nThis placeholder represents a file that would be stored in Supabase Storage in live backend mode.`,
     ], { type: 'text/plain' })
     return { data: stored ?? fallback, error: null }
   },

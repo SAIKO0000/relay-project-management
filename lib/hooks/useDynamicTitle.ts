@@ -15,7 +15,7 @@ const getPageTitle = (tab: TabType): string => {
     reports: 'Reports'
   }
   
-  return `GYG Power Systems - ${titles[tab] || 'Dashboard'}`
+  return `${titles[tab] || 'Dashboard'} | Relay`
 }
 
 export function useDynamicTitle(activeTab: string) {

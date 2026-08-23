@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,6 +15,7 @@ import { usePersonnel } from "@/lib/hooks/usePersonnel"
 import { useAuth } from "@/lib/auth"
 import { toast } from "react-hot-toast"
 import { useModalMobileHide } from "@/lib/modal-mobile-utils"
+import { uploadAccept, validateUploadFile } from "@/lib/upload-policy"
 
 interface ReportUploadModalProps {
   readonly children?: React.ReactNode
@@ -42,13 +43,6 @@ export function ReportUploadModal({ children, onUploadComplete, preselectedProje
   const { personnel } = usePersonnel()
   const { user } = useAuth()
 
-  // Set initial status when modal opens - always pending for uploads
-  useEffect(() => {
-    if (open) {
-      setStatus("pending") // Always pending for new uploads
-    }
-  }, [open])
-
   // Get authorized reviewers (excluding current user to prevent self-approval)
   const authorizedReviewers = personnel.filter(person => 
     ["Project Manager", "Senior Electrical Engineer", "Field Engineer", "Design Engineer"].includes(person.position || "") &&
@@ -75,6 +69,12 @@ export function ReportUploadModal({ children, onUploadComplete, preselectedProje
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
     if (files?.[0]) {
+      const validationError = validateUploadFile(files[0], 'document')
+      if (validationError) {
+        toast.error(validationError)
+        event.target.value = ''
+        return
+      }
       setSelectedFile(files[0])
     }
   }
@@ -249,7 +249,10 @@ export function ReportUploadModal({ children, onUploadComplete, preselectedProje
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(nextOpen) => {
+      if (nextOpen) setStatus("pending")
+      setOpen(nextOpen)
+    }}>
       <DialogTrigger asChild>
         {children || (
           <Button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700">
@@ -286,7 +289,7 @@ export function ReportUploadModal({ children, onUploadComplete, preselectedProje
                     onChange={handleFileSelect}
                     className="hidden"
                     id="file-upload"
-                    accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.dwg,.dxf,.zip,.rar,.7z,.jpg,.jpeg,.png,.gif,.bmp,.webp,.svg,.mp4,.avi,.mov,.mp3,.wav,.js,.ts,.html,.css,.json,.xml,.py,.java,.cpp,.c,.ppt,.pptx"
+                    accept={uploadAccept('document')}
                   />
                   <Label htmlFor="file-upload" className="cursor-pointer">
                     <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-2 sm:mb-4 rounded-full bg-gradient-to-br from-orange-100 to-red-100 flex items-center justify-center">
@@ -294,7 +297,7 @@ export function ReportUploadModal({ children, onUploadComplete, preselectedProje
                     </div>
                     <p className="text-sm sm:text-base font-medium text-gray-700 mb-1 sm:mb-2">Choose a file to upload</p>
                     <p className="text-xs sm:text-sm text-gray-500">
-                      Supports documents, images, archives, CAD files, and more
+                      Supports PDF, DOCX, TXT, JPEG, PNG, and WebP files up to 5 MB
                     </p>
                   </Label>
                 </div>

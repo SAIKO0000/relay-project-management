@@ -1,6 +1,6 @@
 # 📁 Scripts Directory
 
-This directory contains migration and setup scripts for creating a portfolio version of ProjTrack.
+This directory contains migration and setup scripts for creating a portfolio version of Relay.
 
 ## 📋 Files Overview
 
@@ -212,4 +212,4 @@ After successful migration:
 4. **Write blog post** about the development process
 5. **Add to portfolio** as a featured project
 
-Your ProjTrack portfolio is ready to impress! 🚀
+Your Relay portfolio is ready to demonstrate! 🚀

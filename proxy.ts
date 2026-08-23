@@ -1,33 +1,53 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { updatePrivateBetaSession } from '@/lib/supabase/proxy'
 
 export async function proxy(req: NextRequest) {
-  // Public routes that don't require authentication
-  const publicRoutes = ['/auth/login', '/auth/signup']
   const { pathname } = req.nextUrl
+  const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE !== 'false'
 
   // The public portfolio build has no real accounts or public diagnostic UI.
-  if (process.env.NEXT_PUBLIC_DEMO_MODE !== 'false') {
+  if (isDemoMode) {
     if (pathname.startsWith('/auth') || pathname.startsWith('/debug') || pathname.startsWith('/test')) {
       return NextResponse.redirect(new URL('/', req.url))
     }
-  }
-
-  // Allow access to public routes and static files
-  if (publicRoutes.includes(pathname) || 
-      pathname.startsWith('/_next') || 
-      pathname.startsWith('/api') ||
-      pathname.includes('.')) {
     return NextResponse.next()
   }
 
-  // For protected routes, we'll let the client-side auth handle redirection
-  // This is a simplified middleware - full auth checking would require server-side session management
-  return NextResponse.next()
+  if (pathname.startsWith('/debug') || pathname.startsWith('/test') || pathname === '/auth-demo') {
+    return NextResponse.redirect(new URL('/', req.url))
+  }
+
+  const { user, applySession } = await updatePrivateBetaSession(req)
+
+  // Private beta accounts are provisioned only through Supabase invitations.
+  if (pathname === '/auth/signup') {
+    return applySession(NextResponse.redirect(new URL('/auth/login?inviteOnly=1', req.url)))
+  }
+
+  const publicRoutes = [
+    '/auth/login',
+    '/auth/confirm',
+    '/auth/forgot-password',
+    '/auth/reset-password',
+  ]
+  const isPublicRoute = publicRoutes.includes(pathname)
+
+  if (!user && !isPublicRoute && !pathname.startsWith('/api')) {
+    const loginUrl = new URL('/auth/login', req.url)
+    loginUrl.searchParams.set('next', pathname)
+    return applySession(NextResponse.redirect(loginUrl))
+  }
+
+  if (user && pathname === '/auth/login') {
+    return applySession(NextResponse.redirect(new URL('/', req.url)))
+  }
+
+  return applySession(NextResponse.next({ request: req }))
 }
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|logo.svg).*)',
+    '/((?!_next/static|_next/image|favicon.ico|logo.svg|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

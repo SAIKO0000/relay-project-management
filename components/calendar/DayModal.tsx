@@ -27,6 +27,7 @@ import {
 } from "lucide-react"
 import { EventFormModal } from "../event-form-modal"
 import type { DayModalProps } from "./types"
+import { uploadAccept } from "@/lib/upload-policy"
 
 export const DayModal: React.FC<DayModalProps> = ({
   selectedDay,
@@ -309,10 +310,10 @@ export const DayModal: React.FC<DayModalProps> = ({
                   type="file"
                   id="photo-upload"
                   multiple
-                  accept="image/*,video/*"
+                  accept={uploadAccept('photo')}
                   onChange={onFileUpload}
                   className="hidden"
-                  aria-label="Select photos and videos to upload"
+                  aria-label="Select JPEG, PNG, or WebP images to upload"
                 />
                 <Button
                   size="default"

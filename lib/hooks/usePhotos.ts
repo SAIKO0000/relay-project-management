@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabase'
 import type { Database } from '../supabase.types'
+import { getActiveWorkspaceId, getCachedPrivateStorageUrl, workspaceStoragePath } from '../workspace'
+import { assertUploadFile } from '@/lib/upload-policy'
 
 type Photo = Database['public']['Tables']['photos']['Row']
 type PhotoInsert = Database['public']['Tables']['photos']['Insert']
@@ -54,12 +56,14 @@ export function usePhotos() {
       setUploading(true)
       setUploadProgress(0)
       const uploadedPhotos: Photo[] = []
+      const workspaceId = await getActiveWorkspaceId()
       
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
+        assertUploadFile(file, 'photo')
         const fileExt = file.name.split('.').pop()
         const fileName = `${uploadDate}_${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`
-        const filePath = `photos/${uploadDate}/${fileName}`        // Upload file to Supabase Storage
+        const filePath = workspaceStoragePath(workspaceId, 'photos', uploadDate, fileName)
         const { error: uploadError } = await supabase.storage
           .from('project-photos')
           .upload(filePath, file)
@@ -79,7 +83,7 @@ export function usePhotos() {
           storage_path: filePath,
           upload_date: uploadDate,
           description: null,
-          uploaded_by: null, // Will be set when auth is implemented
+          uploaded_by: (await supabase.auth.getUser()).data.user?.id || null,
         }
 
         const { data: photo, error: dbError } = await supabase
@@ -110,10 +114,7 @@ export function usePhotos() {
   }
 
   const getPhotoUrl = (storageePath: string) => {
-    const { data } = supabase.storage
-      .from('project-photos')
-      .getPublicUrl(storageePath)
-    return data.publicUrl
+    return getCachedPrivateStorageUrl('project-photos', storageePath)
   }
 
   const downloadPhoto = async (photo: Photo) => {
@@ -176,7 +177,9 @@ export function usePhotos() {
   }
 
   useEffect(() => {
-    fetchPhotos()
+    queueMicrotask(() => {
+      void fetchPhotos()
+    })
   }, [])
 
   return {

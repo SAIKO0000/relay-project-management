@@ -9,7 +9,11 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test:private-beta": "node --test tests/private-beta-safeguards.test.mjs",
+    "private-beta:verify-isolation": "node --env-file=.env.private-beta.local scripts/verify-private-beta-isolation.mjs",
+    "private-beta:admin": "node --env-file=.env.private-beta.local scripts/private-beta-admin.mjs",
+    "private-beta:backup": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/backup-private-beta.ps1"
   },
   "dependencies": {
     "@21st-extension/react": "^0.5.14",
@@ -28,8 +32,8 @@
     "@radix-ui/react-select": "^2.2.5",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-switch": "^1.2.5",
-    "@supabase/auth-helpers-nextjs": "^0.10.0",
-    "@supabase/supabase-js": "^2.51.0",
+    "@supabase/ssr": "^0.10.3",
+    "@supabase/supabase-js": "^2.112.3",
     "@tanstack/react-query": "^5.84.1",
     "@tanstack/react-query-devtools": "^5.86.0",
     "class-variance-authority": "^0.7.1",

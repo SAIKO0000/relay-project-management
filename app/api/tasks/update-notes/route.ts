@@ -1,21 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { getAuthenticatedRouteContext } from '@/lib/supabase/route-auth'
 
 export async function PATCH(request: NextRequest) {
   try {
-    const token = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '')
-    const { data: { user } } = token ? await supabase.auth.getUser(token) : { data: { user: null } }
-    if (!user) {
+    const auth = await getAuthenticatedRouteContext(request)
+    if (!auth) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    const { supabase } = auth
 
     const { taskId, notes } = await request.json()
 
-    if (!taskId) {
+    if (typeof taskId !== 'string' || !/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(taskId)) {
       return NextResponse.json(
-        { error: 'Task ID is required' },
+        { error: 'A valid task ID is required' },
         { status: 400 }
       )
+    }
+
+    if (notes !== null && (typeof notes !== 'string' || notes.length > 10000)) {
+      return NextResponse.json({ error: 'Notes must be 10,000 characters or fewer' }, { status: 400 })
     }
 
     // Update task notes

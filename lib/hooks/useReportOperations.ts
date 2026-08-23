@@ -3,6 +3,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'react-hot-toast'
+import { getActiveWorkspaceId, getPrivateStorageUrl, workspaceStoragePath } from '@/lib/workspace'
+import { assertUploadFile } from '@/lib/upload-policy'
 
 export interface ReportFileUploadResult {
   url: string
@@ -13,9 +15,16 @@ export function useReportOperations() {
   const queryClient = useQueryClient()
 
   const uploadReportFile = async (file: File, reportId: string): Promise<ReportFileUploadResult> => {
+    assertUploadFile(file, 'document')
     // Generate unique filename
     const fileExt = file.name.split('.').pop()
-    const fileName = `${reportId}/${Date.now()}.${fileExt}`
+    const workspaceId = await getActiveWorkspaceId()
+    const fileName = workspaceStoragePath(
+      workspaceId,
+      'report-attachments',
+      reportId,
+      `${Date.now()}-${crypto.randomUUID()}.${fileExt}`
+    )
     
     // Upload to storage
     const { error: uploadError } = await supabase.storage
@@ -29,22 +38,19 @@ export function useReportOperations() {
       throw new Error(`Upload failed: ${uploadError.message}`)
     }
 
-    // Get public URL
-    const { data: urlData } = supabase.storage
-      .from('report-attachments')
-      .getPublicUrl(fileName)
+    const signedUrl = await getPrivateStorageUrl('report-attachments', fileName, 900)
 
     return {
-      url: urlData.publicUrl,
+      url: signedUrl,
       path: fileName
     }
   }
 
-  const updateReportWithFile = async (reportId: string, fileUrl: string, fileName: string) => {
+  const updateReportWithFile = async (reportId: string, filePath: string, fileName: string) => {
     const { error } = await supabase
       .from('reports')
       .update({ 
-        file_url: fileUrl,
+        file_url: filePath,
         file_name: fileName,
         updated_at: new Date().toISOString()
       })
@@ -61,7 +67,7 @@ export function useReportOperations() {
       
       for (const file of files) {
         const uploadResult = await uploadReportFile(file, reportId)
-        await updateReportWithFile(reportId, uploadResult.url, file.name)
+        await updateReportWithFile(reportId, uploadResult.path, file.name)
         results.push(uploadResult)
       }
       

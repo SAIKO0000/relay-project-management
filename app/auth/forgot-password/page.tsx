@@ -82,7 +82,7 @@ export default function ForgotPasswordPage() {
               </Button>
             </div>
             <div className="text-center pt-4 border-t">
-              <Link href="/auth" className="inline-flex items-center text-sm text-orange-600 hover:text-orange-700">
+              <Link href="/auth/login" className="inline-flex items-center text-sm text-orange-600 hover:text-orange-700">
                 <ArrowLeft className="h-4 w-4 mr-1" />
                 Back to Sign In
               </Link>
@@ -135,7 +135,7 @@ export default function ForgotPasswordPage() {
           </form>
 
           <div className="mt-6 text-center">
-            <Link href="/auth" className="inline-flex items-center text-sm text-orange-600 hover:text-orange-700">
+            <Link href="/auth/login" className="inline-flex items-center text-sm text-orange-600 hover:text-orange-700">
               <ArrowLeft className="h-4 w-4 mr-1" />
               Back to Sign In
             </Link>
@@ -144,7 +144,7 @@ export default function ForgotPasswordPage() {
           <div className="mt-6 text-center">
             <p className="text-xs text-gray-500">
               Remember your password?{" "}
-              <Link href="/auth" className="text-orange-600 hover:text-orange-700 font-medium">
+              <Link href="/auth/login" className="text-orange-600 hover:text-orange-700 font-medium">
                 Sign In
               </Link>
             </p>

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ===========================================
-# PROJTRACK PORTFOLIO SETUP SCRIPT
+# RELAY PORTFOLIO SETUP SCRIPT
 # ===========================================
 # Automates the migration process for portfolio setup
 
@@ -40,7 +40,7 @@ command_exists() {
 # INITIAL SETUP AND VALIDATION
 # ===========================================
 
-print_status "Starting ProjTrack Portfolio Migration Setup..."
+print_status "Starting Relay Portfolio Migration Setup..."
 
 # Check required tools
 print_status "Checking required tools..."
@@ -139,7 +139,7 @@ print_status "Creating new environment configuration..."
 
 cat > .env.local << EOF
 # ===========================================
-# PROJTRACK PORTFOLIO ENVIRONMENT VARIABLES
+# RELAY PORTFOLIO ENVIRONMENT VARIABLES
 # ===========================================
 # Generated on $(date)
 
@@ -276,6 +276,6 @@ echo ""
 echo -e "${YELLOW}For troubleshooting, see:${NC}"
 echo "- scripts/migration-guide.md"
 echo ""
-echo -e "${GREEN}Your ProjTrack portfolio is ready! 🚀${NC}"
+echo -e "${GREEN}Your Relay portfolio is ready! 🚀${NC}"
 
 exit 0

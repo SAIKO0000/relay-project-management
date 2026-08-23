@@ -2,6 +2,8 @@ import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { supabase, queryKeys } from '@/lib/supabase-query'
 import { toast } from 'react-hot-toast'
+import { getActiveWorkspaceId, workspaceStoragePath } from '@/lib/workspace'
+import { assertUploadFile } from '@/lib/upload-policy'
 
 // Base report interface - matches database schema
 interface Report {
@@ -162,6 +164,7 @@ export function useReportOperations() {
       assignedReviewer?: string
       title?: string
     }) => {
+      assertUploadFile(file, 'document')
       console.log('⬆️ Starting report upload via mutation...')
       
       // Generate unique filename
@@ -169,7 +172,8 @@ export function useReportOperations() {
       const timestamp = Date.now()
       const randomId = Math.random().toString(36).substring(2)
       const fileName = `${projectId}_${timestamp}_${randomId}.${fileExt}`
-      const filePath = `reports/${projectId}/${fileName}`
+      const workspaceId = await getActiveWorkspaceId()
+      const filePath = workspaceStoragePath(workspaceId, 'reports', projectId, fileName)
 
       // Upload file to Supabase Storage
       const { error: uploadError } = await supabase.storage

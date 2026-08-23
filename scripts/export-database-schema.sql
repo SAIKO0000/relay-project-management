@@ -1,8 +1,8 @@
 -- ===========================================
--- PROJTRACK DATABASE SCHEMA EXPORT
+-- RELAY DATABASE SCHEMA EXPORT
 -- ===========================================
 -- Complete schema export for portfolio migration
--- Generated for: ProjTrack Engineering Management System
+-- Generated for: Relay Electrical Project Management
 
 -- Enable required extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

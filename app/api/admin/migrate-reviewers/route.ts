@@ -1,13 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { getAuthenticatedRouteContext } from '@/lib/supabase/route-auth'
 
 export async function GET(request: NextRequest) {
   const adminSecret = process.env.ADMIN_API_SECRET
-  if (!adminSecret || request.headers.get('authorization') !== `Bearer ${adminSecret}`) {
+  if (!adminSecret || request.headers.get('x-admin-secret') !== adminSecret) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
 
   try {
+    const auth = await getAuthenticatedRouteContext(request)
+    if (!auth) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    }
+    const { supabase } = auth
     // Check if the report_reviewers table exists and is accessible
     const { error } = await supabase
       .from('report_reviewers')

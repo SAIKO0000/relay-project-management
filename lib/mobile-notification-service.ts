@@ -235,7 +235,7 @@ export class MobileNotificationService {
           
           // Add user-friendly prompt for Android
           const userConfirmed = confirm(
-            'ProjTrack would like to send you notifications about task deadlines. ' +
+            'Relay would like to send you notifications about task deadlines. ' +
             'This will help you stay on top of important project milestones. Allow notifications?'
           );
           

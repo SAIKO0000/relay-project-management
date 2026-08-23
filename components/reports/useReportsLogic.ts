@@ -5,8 +5,8 @@ import { usePersonnel } from "@/lib/hooks/usePersonnel"
 import { useAuth } from "@/lib/auth"
 import { supabase } from "@/lib/supabase"
 import { toast } from "react-hot-toast"
-import { createThrottledFunction } from "./reports-utils"
 import { type EnhancedReport, type ReviewerNotesModalState, type DeleteDialogState, type ReportDisplayName } from "./types"
+import { useWorkspaceAccess } from "@/lib/hooks/useWorkspaceAccess"
 
 export function useReportsLogic() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -69,13 +69,13 @@ export function useReportsLogic() {
     }
   }, [reports])
   
-  const getReportUrl = useCallback((filePath: string) => {
+  const getReportUrl = useCallback(async (filePath: string) => {
     try {
-      const { data } = supabase.storage
+      const { data, error } = await supabase.storage
         .from('project-documents')
-        .getPublicUrl(filePath)
+        .createSignedUrl(filePath, 900)
         
-      return data?.publicUrl || null
+      return error ? null : data?.signedUrl || null
     } catch (error) {
       console.error('Error creating public URL:', error)
       return null
@@ -93,43 +93,31 @@ export function useReportsLogic() {
   
   const { personnel } = usePersonnel()
   const { user } = useAuth()
+  const { isWorkspaceAdmin } = useWorkspaceAccess()
 
-  // Memoize user calculations
-  const userPosition = useMemo(() => user?.user_metadata?.position || "Team Member", [user])
-  const isAdmin = useMemo(() => 
-    ["Project Manager", "Senior Electrical Engineer", "Field Engineer", "Design Engineer"].includes(userPosition),
-    [userPosition]
-  )
+  const isAdmin = isWorkspaceAdmin
 
   const currentUserPersonnel = useMemo(() => 
     personnel.find(p => p.email === user?.email),
     [personnel, user?.email]
   )
 
-  // Throttled refresh function
-  const throttledRefresh = useMemo(() => 
-    createThrottledFunction(async () => {
-      const now = Date.now()
-      if (now - lastRefreshRef.current < 30000) { // 30 seconds
-        toast.success("Data is already up to date")
-        return
-      }
-
-      try {
-        fetchReports()
-        lastRefreshRef.current = now
-        toast.success("Reports refreshed successfully")
-      } catch (error) {
-        console.error('Error refreshing reports:', error)
-        toast.error("Failed to refresh reports")
-      }
-    }, 3000), // 3 second throttle
-    [fetchReports]
-  )
-
   const handleRefresh = useCallback(() => {
-    throttledRefresh()
-  }, [throttledRefresh])
+    const now = Date.now()
+    if (now - lastRefreshRef.current < 30000) {
+      toast.success("Data is already up to date")
+      return
+    }
+
+    try {
+      fetchReports()
+      lastRefreshRef.current = now
+      toast.success("Reports refreshed successfully")
+    } catch (error) {
+      console.error('Error refreshing reports:', error)
+      toast.error("Failed to refresh reports")
+    }
+  }, [fetchReports])
 
   // Helper function to check if current user is the assigned reviewer for a report
   const isAssignedReviewer = useCallback((report: EnhancedReport) => {
@@ -240,12 +228,12 @@ export function useReportsLogic() {
 
   const handleView = async (report: EnhancedReport) => {
     try {
-      const { data } = supabase.storage
+      const { data } = await supabase.storage
         .from('project-documents')
-        .getPublicUrl(report.file_path)
+        .createSignedUrl(report.file_path, 900)
       
-      if (data?.publicUrl) {
-        window.open(data.publicUrl, '_blank')
+      if (data?.signedUrl) {
+        window.open(data.signedUrl, '_blank', 'noopener,noreferrer')
         toast.success("Opening file...")
       } else {
         toast.error("Unable to view file")
@@ -268,7 +256,7 @@ export function useReportsLogic() {
 
   const handleShare = async (report: EnhancedReport) => {
     try {
-      const shareUrl = getReportUrl(report.file_path)
+      const shareUrl = await getReportUrl(report.file_path)
       
       if (!shareUrl) {
         toast.error("Unable to generate share link")

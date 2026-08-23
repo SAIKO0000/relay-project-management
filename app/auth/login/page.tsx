@@ -19,10 +19,15 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const { signIn } = useAuth()
+  const publicDemoUrl = process.env.NEXT_PUBLIC_PUBLIC_DEMO_URL
+  const accessRequestEmail = process.env.NEXT_PUBLIC_ACCESS_REQUEST_EMAIL
+  const accessRequestHref = accessRequestEmail
+    ? `mailto:${accessRequestEmail}?subject=${encodeURIComponent('Relay private beta access request')}&body=${encodeURIComponent('Name:\nReason for testing:\nExpected testing dates:\n\nI agree to use only fictional or non-sensitive content and not upload illegal, offensive, confidential, copyrighted, or malicious material.')}`
+    : null
 
   // Set dynamic page title
   useEffect(() => {
-    document.title = "GYG Power Systems - Login"
+    document.title = "Sign In | Relay"
   }, [])
 
   // Load saved credentials on component mount
@@ -33,8 +38,10 @@ export default function LoginPage() {
     // Passwords must never be persisted in localStorage.
     localStorage.removeItem('gyg-remembered-password')
     if (savedEmail && wasRemembered) {
-      setEmail(savedEmail)
-      setRememberMe(true)
+      queueMicrotask(() => {
+        setEmail(savedEmail)
+        setRememberMe(true)
+      })
     }
   }, [])
 
@@ -83,7 +90,7 @@ export default function LoginPage() {
           <div className="mx-auto w-32 h-32 mb-6">
             <Image 
               src="/logo.svg" 
-              alt="GYG Power Systems" 
+              alt="Relay by GYG Power Systems"
               width={128}
               height={128}
               className="w-full h-full object-contain"
@@ -91,7 +98,7 @@ export default function LoginPage() {
             />
           </div>
           <h1 className="text-3xl font-bold text-gray-800">
-            Welcome Back
+            Welcome back to Relay
           </h1>
           <p className="text-gray-600 mt-2">
             Sign in to access your project dashboard
@@ -202,32 +209,35 @@ export default function LoginPage() {
                 )}
               </Button>
 
-              {/* Divider */}
-              <div className="relative py-4">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-gray-300" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-2 text-gray-500">New to GYG Power Systems?</span>
-                </div>
+              <div className="rounded-lg border border-orange-200 bg-orange-50 p-3 text-center text-sm text-orange-900">
+                Private beta access is invitation-only. Approved testers receive an email invitation.
+                {accessRequestHref && (
+                  <a
+                    href={accessRequestHref}
+                    className="mt-2 block font-semibold text-orange-700 underline-offset-4 hover:underline"
+                  >
+                    Request private beta access
+                  </a>
+                )}
               </div>
 
-              {/* Sign Up Link */}
-              <div className="text-center">
-                <Link 
-                  href="/auth/signup"
-                  className="text-orange-600 hover:text-orange-700 font-medium transition-colors duration-200"
-                >
-                  Create an account
-                </Link>
-              </div>
+              {publicDemoUrl && (
+                <div className="text-center">
+                  <Link
+                    href={publicDemoUrl}
+                    className="text-orange-600 hover:text-orange-700 font-medium transition-colors duration-200"
+                  >
+                    Open the browser-local public demo
+                  </Link>
+                </div>
+              )}
             </form>
           </CardContent>
         </Card>
 
         {/* Footer */}
         <div className="text-center text-sm text-gray-500">
-          <p>© 2025 GYG Power Systems. All rights reserved.</p>
+          <p>Relay · Electrical project management by GYG Power Systems</p>
         </div>
       </div>
     </div>

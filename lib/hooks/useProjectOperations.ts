@@ -3,6 +3,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'react-hot-toast'
+import { getActiveWorkspaceId, getPrivateStorageUrl, workspaceStoragePath } from '@/lib/workspace'
+import { assertUploadFile } from '@/lib/upload-policy'
 
 export interface ProjectFileUploadResult {
   url: string
@@ -13,9 +15,16 @@ export function useProjectOperations() {
   const queryClient = useQueryClient()
 
   const uploadProjectFile = async (file: File, projectId: string): Promise<ProjectFileUploadResult> => {
+    assertUploadFile(file, 'document')
     // Generate unique filename
     const fileExt = file.name.split('.').pop()
-    const fileName = `${projectId}/${Date.now()}.${fileExt}`
+    const workspaceId = await getActiveWorkspaceId()
+    const fileName = workspaceStoragePath(
+      workspaceId,
+      'projects',
+      projectId,
+      `${Date.now()}-${crypto.randomUUID()}.${fileExt}`
+    )
     
     // Upload to storage
     const { error: uploadError } = await supabase.storage
@@ -29,22 +38,19 @@ export function useProjectOperations() {
       throw new Error(`Upload failed: ${uploadError.message}`)
     }
 
-    // Get public URL
-    const { data: urlData } = supabase.storage
-      .from('project-files')
-      .getPublicUrl(fileName)
+    const signedUrl = await getPrivateStorageUrl('project-files', fileName, 900)
 
     return {
-      url: urlData.publicUrl,
+      url: signedUrl,
       path: fileName
     }
   }
 
-  const updateProjectWithFile = async (projectId: string, fileUrl: string, fileName: string) => {
+  const updateProjectWithFile = async (projectId: string, filePath: string, fileName: string) => {
     const { error } = await supabase
       .from('projects')
       .update({ 
-        attachment_url: fileUrl,
+        attachment_url: filePath,
         attachment_name: fileName,
         updated_at: new Date().toISOString()
       })
@@ -61,7 +67,7 @@ export function useProjectOperations() {
       
       for (const file of files) {
         const uploadResult = await uploadProjectFile(file, projectId)
-        await updateProjectWithFile(projectId, uploadResult.url, file.name)
+        await updateProjectWithFile(projectId, uploadResult.path, file.name)
         results.push(uploadResult)
       }
       

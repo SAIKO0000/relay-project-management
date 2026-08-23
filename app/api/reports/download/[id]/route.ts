@@ -1,16 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { getAuthenticatedRouteContext } from '@/lib/supabase/route-auth'
 
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const token = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '')
-    const { data: { user } } = token ? await supabase.auth.getUser(token) : { data: { user: null } }
-    if (!user) return new NextResponse('Unauthorized', { status: 401 })
+    const auth = await getAuthenticatedRouteContext(request)
+    if (!auth) return new NextResponse('Unauthorized', { status: 401 })
+    const { supabase } = auth
 
     const params = await context.params
+    if (!/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(params.id)) {
+      return new NextResponse('Invalid report ID', { status: 400 })
+    }
     // Get the report details
     const { data: report, error: reportError } = await supabase
       .from('reports')
@@ -37,7 +40,9 @@ export async function GET(
     // Set appropriate headers for download
     const headers = new Headers()
     headers.set('Content-Type', fileData.type || 'application/octet-stream')
-    headers.set('Content-Disposition', `attachment; filename="${report.file_name}"`)
+    const safeFileName = report.file_name.replace(/[\r\n"]/g, '_')
+    headers.set('Content-Disposition', `attachment; filename="${safeFileName}"`)
+    headers.set('Cache-Control', 'private, no-store')
     
     return new NextResponse(arrayBuffer, {
       status: 200,

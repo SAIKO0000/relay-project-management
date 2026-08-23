@@ -1,5 +1,5 @@
 -- ===========================================
--- PROJTRACK DEMO DATA SEEDING SCRIPT
+-- RELAY DEMO DATA SEEDING SCRIPT
 -- ===========================================
 -- Demo data for portfolio showcase
 -- Contains realistic but fictional data
@@ -569,6 +569,6 @@ WHERE id IN (
 -- - 5 Reports (progress, safety, environmental, technical)
 
 -- All data is realistic but fictional, suitable for portfolio demonstration
--- Data demonstrates the full functionality of the ProjTrack system
+-- Data demonstrates the full functionality of the Relay system
 -- Includes various project statuses, priorities, and categories
 -- Shows progression from planning through completion

@@ -1,10 +1,10 @@
-# 🚀 ProjTrack Database Migration Guide
+# 🚀 Relay Database Migration Guide
 
 ## 📋 Overview
-This guide will help you migrate your ProjTrack database from your private company Supabase instance to a new public portfolio instance.
+This guide will help you migrate your Relay database from your private company Supabase instance to a new public portfolio instance.
 
 ## 🎯 Goals
-- ✅ Create a portfolio-ready version of ProjTrack
+- ✅ Create a portfolio-ready version of Relay
 - ✅ Preserve all database schema and functionality  
 - ✅ Use demo data instead of company data
 - ✅ Enable public GitHub repository
@@ -292,4 +292,4 @@ Once complete, you'll have:
 - ✅ Professional portfolio piece
 - ✅ No company data exposure
 
-Your ProjTrack portfolio is ready to impress! 🚀
+Your Relay portfolio is ready to demonstrate! 🚀

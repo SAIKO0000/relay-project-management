@@ -1,4 +1,4 @@
-🚀 Welcome to ProjTrack Portfolio Demo!
+Welcome to Relay!
 ========================================
 
 Hi there! 👋
@@ -21,7 +21,7 @@ This is a demonstration environment with sample data. All projects and tasks are
 After confirming your email, you'll have full access to explore all features of this engineering management platform.
 
 ---
-ProjTrack Portfolio Demo
+Relay · Electrical Project Management
 Built with Next.js, TypeScript, Supabase & Firebase
 
 This is a portfolio demonstration project.

@@ -1,22 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { getAuthenticatedRouteContext } from '@/lib/supabase/route-auth'
 
 export async function POST(request: NextRequest) {
   try {
     const { userIds } = await request.json()
     
-    if (!Array.isArray(userIds)) {
-      return NextResponse.json({ error: 'userIds must be an array' }, { status: 400 })
+    if (
+      !Array.isArray(userIds) ||
+      userIds.length > 100 ||
+      userIds.some((id) => typeof id !== 'string' || !/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(id))
+    ) {
+      return NextResponse.json({ error: 'userIds must contain at most 100 UUIDs' }, { status: 400 })
     }
 
-    const supabase = createRouteHandlerClient({ cookies })
-
-    // Check authentication
-    const { data: { session }, error: authError } = await supabase.auth.getSession()
-    if (authError || !session) {
+    const auth = await getAuthenticatedRouteContext(request)
+    if (!auth) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    const { supabase, user } = auth
 
     // Create a map to store user ID to name mappings
     const userNames: Record<string, string> = {}
@@ -24,9 +25,9 @@ export async function POST(request: NextRequest) {
     // Since we may not have service role access, let's use a simpler approach
     // For now, we'll show user IDs with a more friendly format
     for (const userId of userIds) {
-      if (session.user.id === userId) {
+      if (user.id === userId) {
         // For current user, we can get their info
-        const currentUserEmail = session.user.email
+        const currentUserEmail = user.email
         if (currentUserEmail) {
           // Try to find in personnel
           const { data: personnel } = await supabase
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
           if (personnel?.name) {
             userNames[userId] = personnel.name
           } else {
-            userNames[userId] = session.user.user_metadata?.name || 
+            userNames[userId] = user.user_metadata?.name ||
                               currentUserEmail.split('@')[0] || 
                               'You'
           }

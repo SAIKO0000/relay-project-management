@@ -1,4 +1,4 @@
-# ProjTrack Portfolio Demo
+# Relay — Electrical Project Management
 
 > **Engineering Management System - Portfolio Demonstration**
 
@@ -6,7 +6,7 @@ A comprehensive project management dashboard built with modern web technologies,
 
 ## 🎯 **Live Demo**
 
-🌐 **[View Live Demo](https://projtrack-portfolio-demo.vercel.app)**
+🌐 **[View Live Demo](https://relay-portfolio-demo.vercel.app)**
 
 See [PRIVATE_BETA_AND_BACKUP_PLAN.md](./PRIVATE_BETA_AND_BACKUP_PLAN.md) for the planned invite-only deployment, data-isolation, security, and backup model.
 
@@ -121,8 +121,8 @@ This application contains **fictional demo data** for portfolio purposes. All pr
 ### **Environment Setup**
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/projtrack-portfolio-demo.git
-cd projtrack-portfolio-demo
+git clone https://github.com/yourusername/relay-project-management.git
+cd relay-project-management
 
 # Install dependencies
 npm install
@@ -159,7 +159,7 @@ npm run dev
 ## 📁 **Project Structure**
 
 ```
-projtrack-portfolio-demo/
+relay-project-management/
 ├── app/                    # Next.js App Router pages
 ├── components/             # Reusable UI components
 ├── lib/                    # Utilities, hooks, and services
