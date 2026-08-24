@@ -4,9 +4,9 @@ Last reviewed: August 24, 2026
 
 ## Implementation status
 
-Work is isolated on `feature/private-beta-auth`. The application and migration foundation is implemented locally but **has not been deployed**. A separate zero-cost Vercel project shell named `relay-private-beta` exists with browser-safe production variables only; it remains undeployed until database verification passes. Automatic Git deployment is intentionally disconnected so an unrelated `main` push cannot launch live-backend mode prematurely.
+The application and migration foundation is merged into `main`. The separate Vercel project `relay-private-beta` received its first production deployment on August 25, 2026 at `https://relay-private-beta.vercel.app`, with browser-safe production variables only and no service-role key. Automatic Git deployment remains intentionally disconnected while final owner testing is completed, so an unrelated `main` push cannot silently change the live-backend deployment.
 
-The live backend now has two owner-controlled Auth users, six hardened private buckets, tenant workspaces, quotas, write guards, and a passing readiness RPC. The unrelated third Auth user was removed after owner review. Do not invite external users until the private deployment and two-account isolation test also pass.
+The live backend now has two owner-controlled Auth users, six hardened private buckets, tenant workspaces, quotas, write guards, and a passing readiness RPC. The unrelated third Auth user was removed after owner review. Relay Auth URLs and invitation/recovery templates are configured, and the deployed login/redirect smoke test passes. Do not invite external users until the two local test credential pairs match the retained accounts, the two-account isolation test passes, the invitation/recovery flow is exercised, and both billing dashboards are confirmed.
 
 Local SQL validation is complete. Both migrations apply cleanly to a disposable synthetic baseline, and a newly inserted Auth user receives exactly one isolated workspace with one fictional starter project, two tasks, and one event. A second rehearsal restored the current real `qdagzcivuddbztsybxfk` database backup into a disposable PostgreSQL instance, preserved both owner Auth users and all public application rows, applied both migrations, and passed `scripts/verify-private-beta-security.sql`. Both migrations, the fail-closed audit, and the follow-up Relay branding migration subsequently passed on the live Supabase project on August 24, 2026.
 
@@ -23,7 +23,7 @@ Two pre-migration logical backups of `qdagzcivuddbztsybxfk` were completed and i
 - `scripts/private-beta-admin.mjs` provides readiness-gated invitation, ban, and isolated-account cleanup commands with a default three-user cap.
 - `scripts/verify-private-beta-isolation.mjs` verifies two-account database and Storage isolation after deployment.
 
-The public demo remains the production-safe version on `main`; `NEXT_PUBLIC_DEMO_MODE=true` bypasses live auth and continues using browser-local fictional data.
+The public demo and private beta use the same reviewed `main` source with different deployment variables. The public project uses `NEXT_PUBLIC_DEMO_MODE=true` and browser-local fictional data; the private project uses `NEXT_PUBLIC_DEMO_MODE=false` and invite-only Supabase authentication.
 
 ### Required validation before any remote change
 
@@ -48,7 +48,7 @@ Keep one repository and one maintained codebase, with two isolated deployments:
 
 Do not create a permanent copy of the application or maintain unrelated "demo" and "real" branches. They will drift, duplicate fixes, and make security reviews harder. Use short-lived feature branches for development, merge reviewed work into `main`, and select behavior through deployment-specific environment variables.
 
-The current `main` branch is the public-demo checkpoint. Do not create the private deployment until its authorization policies and data model have been implemented and tested.
+The current `main` branch is the shared reviewed source for both deployments. The private deployment now exists, but remains closed to external testers until its final owner-only isolation and invitation tests pass.
 
 ## Recommended repository and deployment layout
 
@@ -63,7 +63,7 @@ The current `main` branch is the public-demo checkpoint. Do not create the priva
 
 ### Private beta deployment
 
-- Create a second Vercel project connected to this same GitHub repository and `main` branch.
+- Deploy the same reviewed `main` source to a second Vercel project. The initial deployment may use the Vercel CLI; connect Git later only if automatic private deployments are desired.
 - Give it the separate URL `relay-private-beta.vercel.app`.
 - Set `NEXT_PUBLIC_DEMO_MODE=false` only in that Vercel project.
 - Connect it to `projtrack-portfolio` Supabase (`qdagzcivuddbztsybxfk`), which contains the application schema currently configured by this repository. The public demo must stay in browser-local mode and must not use that backend for visitor data.

@@ -1,21 +1,21 @@
 ---
 title: "Relay Private Beta — Tester Access Runbook"
 subtitle: "Owner checklist for safely onboarding and removing real test users"
-date: "August 24, 2026"
+date: "August 25, 2026"
 ---
 
 # Relay Private Beta — Tester Access Runbook
 
 **Owner checklist for safely onboarding and removing real test users**  
-Last reviewed: August 24, 2026
+Last reviewed: August 25, 2026
 
 ## Current status
 
-**NOT READY FOR EXTERNAL TESTERS YET.**
+**CONTROLLED OWNER TESTING ONLY — NOT READY FOR EXTERNAL TESTERS YET.**
 
-The application-side foundation and safeguards exist on `feature/private-beta-auth`. The separate zero-cost Vercel project `relay-private-beta` has been created and its browser-safe production variables are configured, but it has intentionally not been deployed. Automatic Git deployment is deliberately disconnected until Supabase passes readiness.
+The application-side foundation and safeguards are merged into `main`. The separate Vercel project `relay-private-beta` received its first production deployment on August 25, 2026 at `https://relay-private-beta.vercel.app`. Its browser-safe production variables are configured, no service-role key is present, and automatic Git deployment remains deliberately disconnected while final owner tests are completed.
 
-The configured Supabase backend passed its restored-backup rehearsal and live migration on August 24, 2026. The unrelated Auth user was removed, the two retained accounts are owner-controlled, both migrations applied successfully, and the fail-closed security audit passed. Public signup and anonymous sign-ins are disabled, while email confirmation remains enabled. Do not invite external testers until the remaining URL/template, deployment, and two-account isolation checks pass.
+The configured Supabase backend passed its restored-backup rehearsal and live migration on August 24, 2026. The unrelated Auth user was removed, the two retained accounts are owner-controlled, both migrations applied successfully, and the fail-closed security audit passed. Public signup and anonymous sign-ins are disabled, email confirmation remains enabled, Relay Auth URLs are configured, and the Relay invitation/recovery templates are saved. The live login redirect and branding smoke test passed on August 25. Do not invite external testers until the two local test-account credentials are mapped to the retained users, the isolation test passes, the invitation/recovery flow is exercised, and billing is confirmed.
 
 Do not invite an external tester until every item in the one-time launch checklist is complete.
 
@@ -44,7 +44,7 @@ Complete this once before accepting any real tester.
 - [x] Apply both private-beta migrations to the restored disposable environment, in filename order.
 - [x] Run `scripts/verify-private-beta-security.sql` successfully against the restored real-project backup.
 - [x] Apply both migrations to a disposable synthetic baseline and verify fail-closed security plus automatic starter provisioning.
-- [ ] Test two unrelated invited accounts and confirm neither can read, change, delete, subscribe to, download, or guess the other account's records and files.
+- [ ] Test two unrelated invited accounts and confirm neither can read, change, delete, subscribe to, download, or guess the other account's records and files. Blocked on August 25 because the two `TEST_USER_*` email/password pairs in `.env.private-beta.local` do not yet match the retained Auth users.
 - [ ] Test two controlled accounts in one shared workspace if collaboration will be demonstrated.
 - [ ] Resolve any migration, RLS, Storage, and strict-TypeScript failures without weakening the security checks.
 - [x] Apply both verified migrations to `projtrack-portfolio` Supabase (`qdagzcivuddbztsybxfk`) only and pass the live fail-closed audit. Completed August 24, 2026; `GYG_ProjTrack's Project` (`qvoockauodrptvyqqqbe`) remained untouched.
@@ -52,10 +52,11 @@ Complete this once before accepting any real tester.
 - [x] Create the separate `relay-private-beta` Vercel project shell.
 - [x] Set `NEXT_PUBLIC_DEMO_MODE=false` only on the private-beta production environment.
 - [x] Configure only the private Supabase URL and publishable key on that deployment. No service-role key was added.
-- [ ] Reconnect the Vercel project to Git only after the verified private-beta code is merged into the intended production branch.
+- [x] Deploy the verified `main` source to the private Vercel project. Completed through the Vercel CLI on August 25, 2026; Git remains intentionally disconnected until final owner tests pass.
 - [x] In Supabase Auth, disable new-user signup and anonymous sign-ins; keep email confirmation enabled.
 - [x] Set the Supabase Site URL to `https://relay-private-beta.vercel.app` and allow its exact `/auth/confirm` and `/auth/reset-password` redirects.
-- [ ] Configure and test the invitation email so it opens `/auth/confirm`, establishes a session, and sends the tester to `/auth/reset-password`.
+- [x] Save the Relay invitation and recovery email templates in Supabase.
+- [ ] Send a controlled invitation and verify that it opens `/auth/confirm`, establishes a session, and sends the tester to `/auth/reset-password`.
 - [x] Add conservative upload limits, MIME-type restrictions, per-workspace quotas, write throttling, a three-user CLI cap, and isolated-account cleanup tooling.
 - [x] Add fictional starter-data onboarding for newly created workspaces.
 - [x] Disable or block signup, debug, and test routes in live-backend mode.
@@ -83,7 +84,7 @@ npm run private-beta:admin -- cleanup --email person@example.com --confirm perso
 - Review existing Auth users before opening an invitation slot. Completed August 23, 2026: one unrelated user removed and two owner accounts retained.
 - Choose the public contact email used by the access-request link.
 - Confirm the organization billing pages still show Free/Hobby with no trial or paid add-on.
-- Reconnect Git and authorize the first production deployment only after every readiness and isolation test passes.
+- Decide whether to connect the private Vercel project to Git after final owner testing. The first production deployment was performed manually through the Vercel CLI so public-demo pushes cannot silently change the private beta.
 - Review any shared-workspace cleanup manually; the CLI deliberately refuses to delete it.
 
 ## Checklist for each access request
