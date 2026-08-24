@@ -15,7 +15,7 @@ Last reviewed: August 25, 2026
 
 The application-side foundation and safeguards are merged into `main`. The separate Vercel project `relay-private-beta` received its first production deployment on August 25, 2026 at `https://relay-private-beta.vercel.app`. Its browser-safe production variables are configured, no service-role key is present, and automatic Git deployment remains deliberately disconnected while final owner tests are completed.
 
-The configured Supabase backend passed its restored-backup rehearsal and live migration on August 24, 2026. The unrelated Auth user was removed, the two retained accounts are owner-controlled, both migrations applied successfully, and the fail-closed security audit passed. Public signup and anonymous sign-ins are disabled, email confirmation remains enabled, Relay Auth URLs are configured, and the Relay invitation/recovery templates are saved. The live login redirect and branding smoke test passed on August 25. Do not invite external testers until the two local test-account credentials are mapped to the retained users, the isolation test passes, the invitation/recovery flow is exercised, and billing is confirmed.
+The configured Supabase backend passed its restored-backup rehearsal and live migration on August 24, 2026. The unrelated Auth user was removed, the two retained accounts are owner-controlled, both migrations applied successfully, and the fail-closed security audit passed. Public signup and anonymous sign-ins are disabled, email confirmation remains enabled, Relay Auth URLs are configured, and the Relay invitation/recovery templates are saved. The live login redirect and branding smoke test passed on August 25. The two-account runtime test also passed database and private Storage isolation, and its cleanup audit found no temporary rows or files. Do not invite external testers until the invitation/recovery flow is exercised and Supabase billing is confirmed.
 
 Do not invite an external tester until every item in the one-time launch checklist is complete.
 
@@ -44,7 +44,7 @@ Complete this once before accepting any real tester.
 - [x] Apply both private-beta migrations to the restored disposable environment, in filename order.
 - [x] Run `scripts/verify-private-beta-security.sql` successfully against the restored real-project backup.
 - [x] Apply both migrations to a disposable synthetic baseline and verify fail-closed security plus automatic starter provisioning.
-- [ ] Test two unrelated invited accounts and confirm neither can read, change, delete, subscribe to, download, or guess the other account's records and files. Blocked on August 25 because the two `TEST_USER_*` email/password pairs in `.env.private-beta.local` do not yet match the retained Auth users.
+- [x] Test two unrelated controlled accounts and confirm cross-workspace project reads, inserts, updates, and private Storage downloads are denied. Passed August 25, 2026; cleanup verification found zero temporary project rows and zero remaining test folders.
 - [ ] Test two controlled accounts in one shared workspace if collaboration will be demonstrated.
 - [ ] Resolve any migration, RLS, Storage, and strict-TypeScript failures without weakening the security checks.
 - [x] Apply both verified migrations to `projtrack-portfolio` Supabase (`qdagzcivuddbztsybxfk`) only and pass the live fail-closed audit. Completed August 24, 2026; `GYG_ProjTrack's Project` (`qvoockauodrptvyqqqbe`) remained untouched.
