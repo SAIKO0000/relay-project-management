@@ -54,6 +54,11 @@ export interface BulkDeleteDialogState {
   isDeleting: boolean
 }
 
+export interface UploadIssue {
+  id: string
+  message: string
+}
+
 // Component props interfaces
 export interface PhotoCountBadgeProps {
   date: Date
@@ -122,6 +127,7 @@ export interface DayModalProps {
   showDayModal: boolean
   dayPhotos: Photo[]
   uploadFiles: File[]
+  uploadIssues: UploadIssue[]
   photoTitle: string
   uploading: boolean
   uploadProgress: number
@@ -134,6 +140,7 @@ export interface DayModalProps {
   onEventCreated: () => void
   onFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void
   onRemoveFile: (index: number) => void
+  onClearUploadIssues: () => void
   onUploadAll: () => void
   onPhotoTitleChange: (title: string) => void
   onPhotoView: (photo: Photo) => void

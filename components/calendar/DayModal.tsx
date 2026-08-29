@@ -24,16 +24,20 @@ import {
   Download,
   Eye,
   Edit,
+  AlertTriangle,
+  Info,
 } from "lucide-react"
 import { EventFormModal } from "../event-form-modal"
 import type { DayModalProps } from "./types"
-import { uploadAccept } from "@/lib/upload-policy"
+import { uploadAccept, uploadPolicySummary } from "@/lib/upload-policy"
+import { isDemoMode } from "@/lib/demo/config"
 
 export const DayModal: React.FC<DayModalProps> = ({
   selectedDay,
   showDayModal,
   dayPhotos,
   uploadFiles,
+  uploadIssues,
   photoTitle,
   uploading,
   uploadProgress,
@@ -46,6 +50,7 @@ export const DayModal: React.FC<DayModalProps> = ({
   onEventCreated,
   onFileUpload,
   onRemoveFile,
+  onClearUploadIssues,
   onUploadAll,
   onPhotoTitleChange,
   onPhotoView,
@@ -347,6 +352,53 @@ export const DayModal: React.FC<DayModalProps> = ({
               </div>
             </div>
 
+            <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2.5 text-sm text-blue-950">
+              <div className="flex items-start gap-2">
+                <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-600" aria-hidden="true" />
+                <div className="space-y-1">
+                  <p className="font-medium">{uploadPolicySummary('photo')} each · Up to 10 images</p>
+                  {isDemoMode && (
+                    <p className="text-xs leading-relaxed text-blue-800">
+                      Demo Mode keeps the original image only for this browser session. Refreshing or resetting the demo removes it; nothing is uploaded to cloud storage.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {uploadIssues.length > 0 && (
+              <div
+                role="alert"
+                aria-live="assertive"
+                className="rounded-lg border border-red-300 bg-red-50 p-3 text-red-950"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-start gap-2">
+                    <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-600" aria-hidden="true" />
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold">
+                        {uploadIssues.length === 1 ? 'This image could not be added' : `${uploadIssues.length} images could not be added`}
+                      </p>
+                      <ul className="mt-1.5 list-disc space-y-1 pl-5 text-xs leading-relaxed text-red-800">
+                        {uploadIssues.map(issue => (
+                          <li key={issue.id} className="break-words">{issue.message}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={onClearUploadIssues}
+                    className="h-8 flex-shrink-0 px-2 text-xs text-red-700 hover:bg-red-100 hover:text-red-900"
+                  >
+                    Dismiss
+                  </Button>
+                </div>
+              </div>
+            )}
+
             {/* Selection Summary for Photos */}
             {isPhotoSelectionMode && selectedPhotos.size > 0 && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 sm:p-3">
@@ -483,7 +535,7 @@ export const DayModal: React.FC<DayModalProps> = ({
                   </div>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No media files yet</h3>
                   <p className="text-gray-500 mb-4 text-sm leading-relaxed">
-                    Upload photos and videos to document this day&apos;s activities and progress
+                    Add images to document this day&apos;s activities and progress
                   </p>
                 </div>
               </div>

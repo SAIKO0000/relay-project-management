@@ -6,6 +6,17 @@ type UploadPolicy = {
   mimeTypesByExtension: Record<string, readonly string[]>
 }
 
+const formatMegabytes = (bytes: number) => {
+  const megabytes = bytes / 1024 / 1024
+  const rounded = Math.ceil((megabytes - Number.EPSILON) * 100) / 100
+  return `${rounded} MB`
+}
+
+const allowedExtensionsLabel = (policy: UploadPolicy) =>
+  Object.keys(policy.mimeTypesByExtension)
+    .map(extension => extension.toUpperCase())
+    .join(', ')
+
 const imageMimeTypes = {
   jpg: ['image/jpeg'],
   jpeg: ['image/jpeg'],
@@ -46,25 +57,32 @@ export function uploadAccept(kind: UploadKind) {
     .join(',')
 }
 
+export function uploadPolicySummary(kind: UploadKind) {
+  const policy = uploadPolicies[kind]
+  return `${allowedExtensionsLabel(policy)} · Maximum ${formatMegabytes(policy.maxBytes)}`
+}
+
 export function validateUploadFile(file: File, kind: UploadKind): string | null {
   const policy = uploadPolicies[kind]
   const extension = getFileExtension(file.name)
   const allowedMimeTypes = policy.mimeTypesByExtension[extension]
 
   if (!allowedMimeTypes) {
-    return `${file.name} is not an allowed ${policy.label} type.`
+    const detectedExtension = extension ? `.${extension}` : 'no file extension'
+    return `${file.name}: ${detectedExtension} is not supported. Choose ${allowedExtensionsLabel(policy)}.`
   }
 
   if (!file.type || !allowedMimeTypes.includes(file.type)) {
-    return `${file.name} has a file type that does not match its extension.`
+    const detectedType = file.type || 'an unknown browser file type'
+    return `${file.name}: the browser reported ${detectedType}, which does not match .${extension}. Try exporting the original as ${allowedExtensionsLabel(policy)}.`
   }
 
   if (file.size <= 0) {
-    return `${file.name} is empty.`
+    return `${file.name}: the file is empty. Choose a complete image file.`
   }
 
   if (file.size > policy.maxBytes) {
-    return `${file.name} exceeds the ${Math.round(policy.maxBytes / 1024 / 1024)} MB limit.`
+    return `${file.name} is ${formatMegabytes(file.size)}. The maximum ${policy.label} size is ${formatMegabytes(policy.maxBytes)}.`
   }
 
   return null

@@ -10,6 +10,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
+    "test:upload-policy": "node --no-warnings --experimental-strip-types --test tests/upload-policy.test.mjs",
     "test:private-beta": "node --test tests/private-beta-safeguards.test.mjs",
     "private-beta:verify-isolation": "node --env-file=.env.private-beta.local scripts/verify-private-beta-isolation.mjs",
     "private-beta:admin": "node --env-file=.env.private-beta.local scripts/private-beta-admin.mjs",

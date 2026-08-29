@@ -36,7 +36,8 @@ import type {
   Event,
   SearchSuggestion,
   PhotoDeleteDialogState,
-  BulkDeleteDialogState
+  BulkDeleteDialogState,
+  UploadIssue
 } from "./types"
 
 export function Calendar() {
@@ -50,6 +51,7 @@ export function Calendar() {
   const [deleteEventTitle, setDeleteEventTitle] = useState<string>("")
   const [editingEvent, setEditingEvent] = useState<Event | null>(null)
   const [uploadFiles, setUploadFiles] = useState<File[]>([])
+  const [uploadIssues, setUploadIssues] = useState<UploadIssue[]>([])
   const [photoTitle, setPhotoTitle] = useState<string>("")
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   
@@ -257,18 +259,35 @@ export function Calendar() {
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const newFiles = Array.from(event.target.files)
-      const validFiles = newFiles.filter(file => {
+      const issues: UploadIssue[] = []
+      const validFiles = newFiles.filter((file, index) => {
         const validationError = validateUploadFile(file, 'photo')
-        if (validationError) toast.error(validationError)
+        if (validationError) {
+          issues.push({
+            id: `${file.name}-${file.size}-${index}`,
+            message: validationError,
+          })
+        }
         return !validationError
       })
-      setUploadFiles(prev => {
-        const combined = [...prev, ...validFiles]
-        if (combined.length > 10) {
-          toast.error('A maximum of 10 images can be uploaded at once.')
-        }
-        return combined.slice(0, 10)
+
+      const availableSlots = Math.max(0, 10 - uploadFiles.length)
+      const acceptedFiles = validFiles.slice(0, availableSlots)
+      validFiles.slice(availableSlots).forEach((file, index) => {
+        issues.push({
+          id: `limit-${file.name}-${file.size}-${index}`,
+          message: `${file.name}: only 10 images can be queued at once. Remove another image before adding this one.`,
+        })
       })
+
+      setUploadFiles(previous => [...previous, ...acceptedFiles])
+      setUploadIssues(issues)
+
+      if (issues.length === 1) {
+        toast.error(issues[0].message)
+      } else if (issues.length > 1) {
+        toast.error(`${issues.length} files could not be added. Review the details in the upload window.`)
+      }
       event.target.value = ''
     }
   }
@@ -279,7 +298,9 @@ export function Calendar() {
 
   const handleUploadAll = async () => {
     if (!selectedDay || uploadFiles.length === 0) {
-      toast.error("Please select files to upload")
+      const message = "Choose at least one supported image before uploading."
+      setUploadIssues([{ id: 'no-files-selected', message }])
+      toast.error(message)
       return
     }
 
@@ -288,11 +309,19 @@ export function Calendar() {
       await uploadPhotos(uploadFiles, dateString, selectedProject !== "all" ? selectedProject : undefined, "", photoTitle)
       setUploadFiles([])
       setPhotoTitle("")
+      setUploadIssues([])
       // Photos will be automatically refreshed via React Query invalidation
       toast.success(`Successfully uploaded ${uploadFiles.length} photos`)
     } catch (error) {
       console.error("Upload error:", error)
-      toast.error("Failed to upload photos")
+      const reason = error instanceof Error
+        ? error.message
+        : typeof error === 'object' && error && 'message' in error && typeof error.message === 'string'
+          ? error.message
+          : 'The browser could not complete the upload.'
+      const message = `Upload failed: ${reason}`
+      setUploadIssues([{ id: `upload-${Date.now()}`, message }])
+      toast.error("The image could not be uploaded. Review the details in the upload window.")
     }
   }
 
@@ -626,6 +655,7 @@ export function Calendar() {
         showDayModal={showDayModal}
         dayPhotos={dayPhotos}
         uploadFiles={uploadFiles}
+        uploadIssues={uploadIssues}
         photoTitle={photoTitle}
         uploading={uploading}
         uploadProgress={uploadProgress}
@@ -638,6 +668,7 @@ export function Calendar() {
         onEventCreated={handleEventCreated}
         onFileUpload={handleFileUpload}
         onRemoveFile={removeFile}
+        onClearUploadIssues={() => setUploadIssues([])}
         onUploadAll={handleUploadAll}
         onPhotoTitleChange={setPhotoTitle}
         onPhotoView={handlePhotoView}
