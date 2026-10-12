@@ -17,8 +17,9 @@ export function DemoModeBanner() {
     <div className="flex min-h-9 items-center justify-between gap-2 border-b border-orange-200 bg-orange-50/90 px-3 py-1.5 text-xs text-orange-950 sm:min-h-10 sm:px-5">
       <div className="flex min-w-0 items-center gap-1.5">
         <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-orange-600 sm:h-4 sm:w-4" aria-hidden="true" />
-        <span className="whitespace-nowrap font-medium sm:hidden">Demo mode</span>
+        <span className="truncate font-medium sm:hidden">Demo mode · © Mark Daniel Iguban</span>
         <span className="hidden truncate sm:inline">{demoModeNotice}</span>
+        <span className="hidden shrink-0 border-l border-orange-300 pl-2 text-orange-800 sm:inline">© {new Date().getFullYear()} Mark Daniel Iguban</span>
       </div>
       <Button
         type="button"

@@ -1,4 +1,4 @@
-import { DEMO_USER_EMAIL, DEMO_USER_ID } from './config'
+import { DEMO_USER_EMAIL, DEMO_USER_ID, DEMO_USER_NAME } from './config'
 
 export type DemoRecord = Record<string, unknown> & { id: string }
 export type DemoDatabase = Record<string, DemoRecord[]>
@@ -16,7 +16,7 @@ export function createDemoSeedData(): DemoDatabase {
   const timestamp = now()
 
   const personnel: DemoRecord[] = [
-    { id: DEMO_USER_ID, user_id: DEMO_USER_ID, name: 'Alex Morgan', email: DEMO_USER_EMAIL, phone: '+63 917 555 0101', position: 'Project Manager', role: 'admin', department: 'Project Delivery', status: 'active', avatar_url: null, created_at: timestamp, updated_at: timestamp },
+    { id: DEMO_USER_ID, user_id: DEMO_USER_ID, name: DEMO_USER_NAME, email: DEMO_USER_EMAIL, phone: '+63 917 555 0101', position: 'Project Manager', role: 'admin', department: 'Project Delivery', status: 'active', avatar_url: null, created_at: timestamp, updated_at: timestamp },
     { id: '550e8400-e29b-41d4-a716-446655440002', name: 'Sarah Johnson', email: 'sarah.johnson@example.test', phone: '+63 917 555 0102', position: 'Site Engineer', role: 'member', department: 'Engineering', status: 'active', avatar_url: null, created_at: timestamp, updated_at: timestamp },
     { id: '550e8400-e29b-41d4-a716-446655440003', name: 'Mike Davis', email: 'mike.davis@example.test', phone: '+63 917 555 0103', position: 'Civil Engineer', role: 'member', department: 'Engineering', status: 'active', avatar_url: null, created_at: timestamp, updated_at: timestamp },
     { id: '550e8400-e29b-41d4-a716-446655440004', name: 'Emily Chen', email: 'emily.chen@example.test', phone: '+63 917 555 0104', position: 'Design Engineer', role: 'member', department: 'Design', status: 'active', avatar_url: null, created_at: timestamp, updated_at: timestamp },
@@ -44,9 +44,9 @@ export function createDemoSeedData(): DemoDatabase {
   ]
 
   const events: DemoRecord[] = [
-    { id: '250e8400-e29b-41d4-a716-446655440001', title: 'Weekly portfolio review', description: 'Review milestones, risks, and upcoming energization work.', date: isoDate(1), time: '10:00:00', type: 'meeting', project_id: projects[0].id, location: 'Project Office', attendees: ['Alex Morgan', 'Sarah Johnson', 'Emily Chen'], created_by: DEMO_USER_ID, created_at: timestamp, updated_at: timestamp },
+    { id: '250e8400-e29b-41d4-a716-446655440001', title: 'Weekly portfolio review', description: 'Review milestones, risks, and upcoming energization work.', date: isoDate(1), time: '10:00:00', type: 'meeting', project_id: projects[0].id, location: 'Project Office', attendees: [DEMO_USER_NAME, 'Sarah Johnson', 'Emily Chen'], created_by: DEMO_USER_ID, created_at: timestamp, updated_at: timestamp },
     { id: '250e8400-e29b-41d4-a716-446655440002', title: 'Site safety walk', description: 'Joint inspection of lifting and access controls.', date: isoDate(3), time: '08:30:00', type: 'inspection', project_id: projects[1].id, location: 'Riverside Site', attendees: ['David Rodriguez', 'Site Team'], created_by: DEMO_USER_ID, created_at: timestamp, updated_at: timestamp },
-    { id: '250e8400-e29b-41d4-a716-446655440003', title: 'Switchgear factory acceptance review', description: 'Close remaining FAT comments with the supplier.', date: isoDate(6), time: '14:00:00', type: 'review', project_id: projects[0].id, location: 'Online Conference', attendees: ['Alex Morgan', 'Supplier Team'], created_by: DEMO_USER_ID, created_at: timestamp, updated_at: timestamp },
+    { id: '250e8400-e29b-41d4-a716-446655440003', title: 'Switchgear factory acceptance review', description: 'Close remaining FAT comments with the supplier.', date: isoDate(6), time: '14:00:00', type: 'review', project_id: projects[0].id, location: 'Online Conference', attendees: [DEMO_USER_NAME, 'Supplier Team'], created_by: DEMO_USER_ID, created_at: timestamp, updated_at: timestamp },
   ]
 
   const reports: DemoRecord[] = [

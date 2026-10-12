@@ -7,6 +7,7 @@ import {
   DEMO_STORAGE_KEY,
   DEMO_USER_EMAIL,
   DEMO_USER_ID,
+  DEMO_USER_NAME,
 } from './config'
 import { createDemoSeedData, type DemoDatabase, type DemoRecord } from './seed-data'
 
@@ -50,7 +51,34 @@ const readDatabase = (): DemoDatabase => {
   }
 
   try {
-    return JSON.parse(stored) as DemoDatabase
+    const database = JSON.parse(stored) as DemoDatabase
+    const demoOwner = database.personnel?.find((person) => person.id === DEMO_USER_ID)
+
+    // Update only the original seeded name; keep names visitors chose themselves.
+    if (demoOwner?.name === 'Alex Morgan') {
+      demoOwner.name = DEMO_USER_NAME
+
+      for (const report of database.reports ?? []) {
+        if (report.uploaded_by === DEMO_USER_ID && report.uploader_name === 'Alex Morgan') {
+          report.uploader_name = DEMO_USER_NAME
+        }
+      }
+
+      for (const event of database.events ?? []) {
+        if (
+          ['250e8400-e29b-41d4-a716-446655440001', '250e8400-e29b-41d4-a716-446655440003'].includes(event.id)
+          && Array.isArray(event.attendees)
+        ) {
+          event.attendees = event.attendees.map((attendee: unknown) =>
+            attendee === 'Alex Morgan' ? DEMO_USER_NAME : attendee
+          )
+        }
+      }
+
+      storage.setItem(DEMO_STORAGE_KEY, JSON.stringify(database))
+    }
+
+    return database
   } catch {
     const seeded = createDemoSeedData()
     storage.setItem(DEMO_STORAGE_KEY, JSON.stringify(seeded))
@@ -351,7 +379,7 @@ const demoUser = {
   confirmed_at: new Date().toISOString(),
   last_sign_in_at: new Date().toISOString(),
   app_metadata: { provider: 'demo', providers: ['demo'] },
-  user_metadata: { name: 'Alex Morgan', position: 'Project Manager', demo: true },
+  user_metadata: { name: DEMO_USER_NAME, position: 'Project Manager', demo: true },
   identities: [],
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),

@@ -6,6 +6,7 @@ export const DEMO_CHANGE_EVENT = 'projtrack-demo-change'
 
 export const DEMO_USER_ID = '550e8400-e29b-41d4-a716-446655440001'
 export const DEMO_USER_EMAIL = 'demo@gygpowersystems.test'
+export const DEMO_USER_NAME = 'Mark Iguban'
 
 export const demoModeNotice =
   'Demo Mode: changes are private to this browser. Email, cloud storage, push delivery, and multi-user collaboration are simulated.'
