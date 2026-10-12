@@ -1,0 +1,4 @@
+# Local browser-test artifacts and user-provided reference images are not part of the app.
+.playwright-mcp/
+test-avatar.html
+951fdc73-7f2f-4db7-baaa-ceb1e9fef87b.jpg
